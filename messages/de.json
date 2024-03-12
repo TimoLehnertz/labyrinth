@@ -1,0 +1,8 @@
+{
+  "Index": {
+    "title": "Hello world!"
+  },
+  "Login": {
+    "userPasswordIncorrect": "Incorrect email or password"
+  }
+}

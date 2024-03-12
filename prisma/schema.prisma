@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model game {
+  id                                         String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  gamestarted                                DateTime          @db.Timestamp(6)
+  gameended                                  DateTime?         @db.Timestamp(6)
+  firstplayertomove                          Int
+  startboard                                 Json
+  move_move_gameTogame                       move[]            @relation("move_gameTogame")
+  user_plays_game_user_plays_game_gameTogame user_plays_game[] @relation("user_plays_game_gameTogame")
+}
+
+model move {
+  id                   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  game                 String       @db.Uuid
+  userid               String       @db.Uuid
+  fromx                Int
+  fromy                Int
+  tox                  Int
+  toy                  Int
+  pushposition         pushposition
+  collectedteasure     Int?
+  game_move_gameTogame game         @relation("move_gameTogame", fields: [game], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                users        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user_plays_game {
+  game                            String @db.Uuid
+  userid                          String @db.Uuid
+  color                           color?
+  game_user_plays_game_gameTogame game   @relation("user_plays_game_gameTogame", fields: [game], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                           users  @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([game, userid])
+}
+
+model users {
+  id                                               String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email                                            String              @unique @db.VarChar(320)
+  username                                         String              @unique @db.VarChar(20)
+  password                                         String              @db.VarChar(200)
+  gameswon                                         Int?                @default(0)
+  gameslost                                        Int?                @default(0)
+  move                                             move[]
+  user_plays_game                                  user_plays_game[]
+  users_are_friends_users_are_friends_useraTousers users_are_friends[] @relation("users_are_friends_useraTousers")
+  users_are_friends_users_are_friends_userbTousers users_are_friends[] @relation("users_are_friends_userbTousers")
+}
+
+model users_are_friends {
+  usera                                String   @db.Uuid
+  userb                                String   @db.Uuid
+  since                                DateTime @db.Timestamp(6)
+  users_users_are_friends_useraTousers users    @relation("users_are_friends_useraTousers", fields: [usera], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_users_are_friends_userbTousers users    @relation("users_are_friends_userbTousers", fields: [userb], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([usera, userb])
+}
+
+enum color {
+  red
+  green
+  blue
+  yellow
+}
+
+enum pushposition {
+  north_1 @map("north-1")
+  north_2 @map("north-2")
+  north_3 @map("north-3")
+  east_1  @map("east-1")
+  east_2  @map("east-2")
+  east_3  @map("east-3")
+  south_1 @map("south-1")
+  south_2 @map("south-2")
+  south_3 @map("south-3")
+  west_1  @map("west-1")
+  west_2  @map("west-2")
+  west_3  @map("west-3")
+}
