@@ -29,7 +29,9 @@ CREATE TABLE IF NOT EXISTS users (
   username varchar(20) UNIQUE NOT NULL,
   password varchar(200) NOT NULL,
   gamesWon INT DEFAULT 0,
-  gamesLost INT DEFAULT 0
+  gamesLost INT DEFAULT 0,
+  UNIQUE(email),
+  UNIQUE(username)
 );
 
 
