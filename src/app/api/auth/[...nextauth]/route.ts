@@ -42,24 +42,48 @@ const handler = NextAuth({
           return null;
         }
         const bcrypt = require("bcryptjs");
-
-        // const salt = bcrypt.genSaltSync(10);
-        // const hash = bcrypt.hashSync(result.data.password, salt);
-        // console.log(hash, user.password);
-        // console.log(result.data.password);
-
         if (!bcrypt.compareSync(result.data.password, user.password)) {
           console.log("wrong password");
           return null;
         }
-        console.log("login");
         return {
           id: user.id,
           email: user.email,
+          name: user.username,
         };
       },
     }),
   ],
+  callbacks: {
+    jwt({ token, user }) {
+      // if (user.id) {
+      //   token.id = user.id;
+      // }
+      // if (user.name) {
+      //   token.username = user.name;
+      // }
+      // console.log("jwt", token, user);
+      // return token;
+      if (user) {
+        return { ...token, ...user }; // Save id to token as docs says: https://next-auth.js.org/configuration/callbacks
+      }
+      return token;
+    },
+
+    session({ session, token }) {
+      if (token.id && typeof token.id === "string") {
+        session.user.id = token.id;
+      }
+      if (token.username && typeof token.username === "string") {
+        session.user.username = token.username;
+      }
+      if (token.email && typeof token.email === "string") {
+        session.user.email = token.email;
+      }
+      console.log("session callback", session, token);
+      return session;
+    },
+  },
 });
 
 export { handler as GET, handler as POST };

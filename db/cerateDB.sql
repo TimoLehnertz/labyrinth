@@ -1,27 +1,28 @@
-COMMIT;
+commit;
 BEGIN;
 
+DROP TABLE IF EXISTS private_chat_room;
+DROP TABLE IF EXISTS friend_request;
 DROP TABLE IF EXISTS user_plays_game;
 DROP TABLE IF EXISTS users_are_friends;
 DROP TABLE IF EXISTS move;
 DROP TABLE IF EXISTS game;
-DROP TABLE IF EXISTS users;
+
 DROP TYPE IF EXISTS PushPosition;
 DROP TYPE IF EXISTS Color;
+
+DROP TABLE IF EXISTS chat_message;
+DROP TABLE IF EXISTS users_in_chatroom;
+DROP TABLE IF EXISTS chat_room;
+
+DROP TABLE IF EXISTS users;
+
+
 
 CREATE TYPE PushPosition AS ENUM ('north-1', 'north-2', 'north-3', 'east-1', 'east-2', 'east-3', 'south-1', 'south-2', 'south-3', 'west-1', 'west-2', 'west-3');
 
 
 CREATE TYPE Color AS ENUM ('red', 'green', 'blue', 'yellow');
-
-CREATE TABLE IF NOT EXISTS game (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
-  gameStarted TIMESTAMP NOT NULL,
-  gameEnded TIMESTAMP,
-  firstPlayerToMove INT NOT NULL,
-  startBoard jsonb NOT NULL
-);
-
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
@@ -32,6 +33,47 @@ CREATE TABLE IF NOT EXISTS users (
   gamesLost INT DEFAULT 0,
   UNIQUE(email),
   UNIQUE(username)
+);
+
+CREATE TABLE IF NOT EXISTS chat_room (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS private_chat_room (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
+  usersA UUID NOT NULL references users,
+  usersB UUID NOT NULL references users
+);
+
+CREATE TABLE IF NOT EXISTS users_in_chatroom (
+  chat_room UUID NOT NULL references chat_room,
+  users UUID NOT NULL references users,
+  UNIQUE(chat_room, users)
+);
+
+CREATE TABLE IF NOT EXISTS chat_message (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
+  chat_room UUID NOT NULL references chat_room,
+  users UUID NOT NULL references users,
+  message TEXT,
+  time_of_send TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS game (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
+  gameStarted TIMESTAMP NOT NULL,
+  gameEnded TIMESTAMP,
+  firstPlayerToMove INT NOT NULL,
+  startBoard jsonb NOT NULL,
+  chat_room UUID REFERENCES chat_room
+);
+
+CREATE TABLE IF NOT EXISTS friend_request (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
+  initiator UUID NOT NULL references users,
+  requested UUID NOT NULL references users,
+  requestedAt timestamp NOT NULL,
+  UNIQUE(initiator, requested)
 );
 
 

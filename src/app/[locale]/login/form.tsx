@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { SubmitButton } from "../submit-button";
+import { SubmitButton } from "../../_components/submit-button";
 import { signIn } from "next-auth/react";
 import { FormEvent } from "react";
+import BlockInput from "../../_components/blockInput";
 
 export default function Form() {
   const router = useRouter();
@@ -23,9 +24,14 @@ export default function Form() {
   };
   return (
     <form onSubmit={handleSubmit}>
-      <input type="email" name="email" placeholder="Email" required />
-      <input type="password" name="password" placeholder="Password" required />
-      <SubmitButton text="login" />
+      <BlockInput id="email" label="email" name="email" type="email" />
+      <BlockInput
+        id="password"
+        label="Password"
+        name="password"
+        type="password"
+      />
+      <SubmitButton text="Login" />
     </form>
   );
 }

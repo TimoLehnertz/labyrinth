@@ -1,28 +1,23 @@
 "use client";
 
-import { FormEvent } from "react";
-import { SubmitButton } from "../submit-button";
+import { FormEvent, useState } from "react";
+import { SubmitButton } from "../../_components/submit-button";
 import toast from "react-hot-toast";
-import { ZodError } from "zod";
+import { SafeParseError, ZodError } from "zod";
 import { registerSchema } from "../../api/register/route";
 import { register } from "@/_lib/apiInterface";
-// import { registerSchema } from "@/lib/";
-
-function generateZodError(zodError: ZodError): string {
-  let errorMessage = "";
-  let delimiter = "";
-  zodError.errors.flat().forEach((error) => {
-    if (error.path.length > 0) {
-      errorMessage += `${delimiter}${error.path.join(".")}: ${error.message}`;
-    } else {
-      errorMessage += `${delimiter}${error.message}`;
-    }
-    delimiter = ", ";
-  });
-  return errorMessage;
-}
+import BlockInput from "@/app/_components/blockInput";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Form() {
+  const router = useRouter();
+  const [error, setError] = useState<ZodError<{
+    email: string;
+    password: string;
+    confirmPassword: string;
+    username: string;
+  }> | null>(null);
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -34,30 +29,63 @@ export default function Form() {
     };
     const result = registerSchema.safeParse(form);
     if (!result.success) {
-      toast.error(generateZodError(result.error));
+      setError(result.error);
       return false;
     }
     const response = await register(result.data);
-    console.log(response);
+    if (response.emailExists) {
+      toast("This email is already in use");
+      return false;
+    }
+    if (response.usernameExists) {
+      toast("This username is already in use");
+      return false;
+    }
+    const signInResponse = await signIn("credentials", {
+      email: result.data.email,
+      password: result.data.password,
+      redirect: false,
+    });
+    if (!signInResponse?.error) {
+      router.push("/");
+      router.refresh();
+    }
     return false;
   };
   return (
-    <div>
-      <form method="POST" onSubmit={handleSubmit}>
-        <label htmlFor="email">Email</label>
-        <input type="text" name="email" id="email" />
-        <br />
-        <label htmlFor="username">Username</label>
-        <input type="text" name="username" id="username" />
-        <br />
-        <label htmlFor="password">Password</label>
-        <input type="password" name="password" id="password" />
-        <br />
-        <label htmlFor="confirmPassword">Confirm password</label>
-        <input type="password" name="confirmPassword" id="confirmPassword" />
-        <br />
-        <SubmitButton text="Register"></SubmitButton>
-      </form>
-    </div>
+    <form method="POST" onSubmit={handleSubmit}>
+      <BlockInput
+        id="email"
+        label="Email"
+        name="email"
+        type="email"
+        zodError={error}
+      ></BlockInput>
+
+      <BlockInput
+        id="username"
+        label="Username"
+        name="username"
+        type="text"
+        zodError={error}
+      ></BlockInput>
+
+      <BlockInput
+        id="password"
+        label="Password"
+        name="password"
+        type="password"
+        zodError={error}
+      ></BlockInput>
+
+      <BlockInput
+        id="confirmPassword"
+        label="Confirm password"
+        name="confirmPassword"
+        type="password"
+        zodError={error}
+      ></BlockInput>
+      <SubmitButton text="Register"></SubmitButton>
+    </form>
   );
 }

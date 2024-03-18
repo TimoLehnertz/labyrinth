@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { Endpoint } from "../endpoint";
 import prisma from "@/_lib/db";
 
 export const registerSchema = z
@@ -20,6 +19,7 @@ export const registerSchema = z
       ctx.addIssue({
         code: "custom",
         message: "The passwords did not match",
+        path: ["confirmPassword"],
       });
     }
   });
