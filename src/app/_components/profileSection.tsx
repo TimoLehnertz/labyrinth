@@ -24,9 +24,11 @@ export default async function profileSection() {
       </>
     );
   }
+  console.log();
   return (
-    <div>
+    <div className="flex space-x-2">
       <CgProfile />
+      <span>{session.user.name}</span>
       <Logout></Logout>
     </div>
   );

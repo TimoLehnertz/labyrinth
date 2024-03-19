@@ -13,10 +13,9 @@ export default async function Page() {
   console.log("session: ", session.user);
   return (
     <div>
-      <h1 className="font-xl">Friends</h1>
       <div>
         <AddFriendsForm />
-        <Chat></Chat>
+        {/* <Chat></Chat> */}
       </div>
     </div>
   );

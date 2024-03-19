@@ -23,9 +23,14 @@ export default async function LocaleLayout({
           <SideBar>
             <ul>
               {isLoggedin && (
-                <li>
-                  <Link href="/friends">Friends</Link>
-                </li>
+                <>
+                  <li>
+                    <Link href="/friends">Friends</Link>
+                  </li>
+                  <li>
+                    <Link href="/play">Play</Link>
+                  </li>
+                </>
               )}
             </ul>
           </SideBar>

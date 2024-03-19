@@ -5,24 +5,14 @@ DROP TABLE IF EXISTS private_chat_room;
 DROP TABLE IF EXISTS friend_request;
 DROP TABLE IF EXISTS user_plays_game;
 DROP TABLE IF EXISTS users_are_friends;
-DROP TABLE IF EXISTS move;
 DROP TABLE IF EXISTS game;
-
 DROP TYPE IF EXISTS PushPosition;
 DROP TYPE IF EXISTS Color;
-
 DROP TABLE IF EXISTS chat_message;
 DROP TABLE IF EXISTS users_in_chatroom;
 DROP TABLE IF EXISTS chat_room;
-
 DROP TABLE IF EXISTS users;
 
-
-
-CREATE TYPE PushPosition AS ENUM ('north-1', 'north-2', 'north-3', 'east-1', 'east-2', 'east-3', 'south-1', 'south-2', 'south-3', 'west-1', 'west-2', 'west-3');
-
-
-CREATE TYPE Color AS ENUM ('red', 'green', 'blue', 'yellow');
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
@@ -63,8 +53,7 @@ CREATE TABLE IF NOT EXISTS game (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
   gameStarted TIMESTAMP NOT NULL,
   gameEnded TIMESTAMP,
-  firstPlayerToMove INT NOT NULL,
-  startBoard jsonb NOT NULL,
+  gameState jsonb NOT NULL,
   chat_room UUID REFERENCES chat_room
 );
 
@@ -74,19 +63,6 @@ CREATE TABLE IF NOT EXISTS friend_request (
   requested UUID NOT NULL references users,
   requestedAt timestamp NOT NULL,
   UNIQUE(initiator, requested)
-);
-
-
-CREATE TABLE IF NOT EXISTS move (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
-  game UUID REFERENCES game NOT NULL,
-  userID UUID REFERENCES users NOT NULL,
-  fromX INT NOT NULL,
-  fromY INT NOT NULL,
-  toX INT NOT NULL,
-  toY INT NOT NULL,
-  pushPosition PushPosition NOT NULL,
-  collectedTeasure INT
 );
 
 
@@ -101,7 +77,7 @@ CREATE TABLE IF NOT EXISTS users_are_friends (
 CREATE TABLE IF NOT EXISTS user_plays_game (
   game UUID NOT NULL REFERENCES game,
   userID UUID NOT NULL REFERENCES users,
-  color Color,
+  playerIndex INT NOT NULL,
   PRIMARY KEY(game, userID)
 );
 

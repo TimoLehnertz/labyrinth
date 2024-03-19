@@ -11,32 +11,16 @@ model game {
   id                                         String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   gamestarted                                DateTime          @db.Timestamp(6)
   gameended                                  DateTime?         @db.Timestamp(6)
-  firstplayertomove                          Int
-  startboard                                 Json
+  gamestate                                  Json
   chat_room                                  String?           @db.Uuid
   chat_room_game_chat_roomTochat_room        chat_room?        @relation("game_chat_roomTochat_room", fields: [chat_room], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  move_move_gameTogame                       move[]            @relation("move_gameTogame")
   user_plays_game_user_plays_game_gameTogame user_plays_game[] @relation("user_plays_game_gameTogame")
-}
-
-model move {
-  id                   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  game                 String       @db.Uuid
-  userid               String       @db.Uuid
-  fromx                Int
-  fromy                Int
-  tox                  Int
-  toy                  Int
-  pushposition         pushposition
-  collectedteasure     Int?
-  game_move_gameTogame game         @relation("move_gameTogame", fields: [game], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users                users        @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model user_plays_game {
   game                            String @db.Uuid
   userid                          String @db.Uuid
-  color                           color?
+  playerindex                     Int
   game_user_plays_game_gameTogame game   @relation("user_plays_game_gameTogame", fields: [game], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users                           users  @relation(fields: [userid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -53,7 +37,6 @@ model users {
   chat_message_chat_message_usersTousers            chat_message[]      @relation("chat_message_usersTousers")
   friend_request_friend_request_initiatorTousers    friend_request[]    @relation("friend_request_initiatorTousers")
   friend_request_friend_request_requestedTousers    friend_request[]    @relation("friend_request_requestedTousers")
-  move                                              move[]
   private_chat_room_private_chat_room_usersaTousers private_chat_room[] @relation("private_chat_room_usersaTousers")
   private_chat_room_private_chat_room_usersbTousers private_chat_room[] @relation("private_chat_room_usersbTousers")
   user_plays_game                                   user_plays_game[]
@@ -115,26 +98,4 @@ model private_chat_room {
   usersb                                String @db.Uuid
   users_private_chat_room_usersaTousers users  @relation("private_chat_room_usersaTousers", fields: [usersa], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_private_chat_room_usersbTousers users  @relation("private_chat_room_usersbTousers", fields: [usersb], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-enum color {
-  red
-  green
-  blue
-  yellow
-}
-
-enum pushposition {
-  north_1 @map("north-1")
-  north_2 @map("north-2")
-  north_3 @map("north-3")
-  east_1  @map("east-1")
-  east_2  @map("east-2")
-  east_3  @map("east-3")
-  south_1 @map("south-1")
-  south_2 @map("south-2")
-  south_3 @map("south-3")
-  west_1  @map("west-1")
-  west_2  @map("west-2")
-  west_3  @map("west-3")
 }
