@@ -1,6 +1,7 @@
 commit;
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 DROP TABLE IF EXISTS private_chat_room;
 DROP TABLE IF EXISTS friend_request;
 DROP TABLE IF EXISTS user_plays_game;
