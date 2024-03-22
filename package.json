@@ -13,6 +13,7 @@
     "@prisma/client": "^5.11.0",
     "babel-preset-env": "^1.7.0",
     "bcryptjs": "^2.4.3",
+    "express-api-helper-classes": "^1.0.2",
     "formatjs": "^0.1.1",
     "labyrinth-game-logic": "^1.0.6",
     "negotiator": "^0.6.3",

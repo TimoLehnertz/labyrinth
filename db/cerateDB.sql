@@ -68,10 +68,10 @@ CREATE TABLE IF NOT EXISTS friend_request (
 
 
 CREATE TABLE IF NOT EXISTS users_are_friends (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
   userA UUID REFERENCES users NOT NULL,
   userB UUID REFERENCES users NOT NULL,
-  since timestamp NOT NULL,
-  PRIMARY KEY(userA, userB)
+  since timestamp NOT NULL
 );
 
 
