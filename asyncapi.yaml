@@ -1,0 +1,4 @@
+templates:
+  - "@asyncapi/ts-nats-template"
+output:
+  target: ".src/asyncapi-client"

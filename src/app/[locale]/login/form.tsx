@@ -2,29 +2,50 @@
 
 import { useRouter } from "next/navigation";
 import { SubmitButton } from "../../_components/submit-button";
-import { signIn } from "next-auth/react";
 import { FormEvent } from "react";
 import BlockInput from "../../_components/blockInput";
+import { client } from "../../clientAPI";
 
 export default function Form() {
   const router = useRouter();
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const response = await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      redirect: false,
+    const usernameEmail = formData.get("usernameEmail");
+    const password = formData.get("password");
+    if (!usernameEmail || !password) {
+      return;
+    }
+    const response = await client.api.POST("/auth/login", {
+      body: {
+        usernameEmail: usernameEmail.toString(),
+        password: password.toString(),
+      },
     });
-    if (!response?.error) {
-      router.push("/");
-      router.refresh();
+    console.log(response);
+    if (response.data) {
+      localStorage.setItem("jwt", response.data.access_token);
+      document.cookie = `jwt=${response.data.access_token}`;
+      // router.push("/");
+      // router.refresh();
     }
     return false;
   };
+
+  const test = async () => {
+    console.log(await client.getLoggedInUser());
+    console.log(localStorage.getItem("jwt"));
+    const friends = await client.api.GET("/friends");
+    console.log(friends);
+  };
   return (
     <form onSubmit={handleSubmit}>
-      <BlockInput id="email" label="email" name="email" type="email" />
+      <BlockInput
+        id="usernameEmail"
+        label="username or email"
+        name="usernameEmail"
+        type="text"
+      />
       <BlockInput
         id="password"
         label="Password"
@@ -32,6 +53,9 @@ export default function Form() {
         type="password"
       />
       <SubmitButton text="Login" />
+      <button type="button" onClick={test}>
+        test
+      </button>
     </form>
   );
 }

@@ -14,7 +14,6 @@
 // };
 
 import createMiddleware from "next-intl/middleware";
-import { withAuth } from "next-auth/middleware";
 import { NextRequest } from "next/server";
 import { i18n } from "./i18n";
 
@@ -27,19 +26,19 @@ const intlMiddleware = createMiddleware({
   localeDetection: false,
 });
 
-const authMiddleware = withAuth(
-  function onSuccess(req) {
-    return intlMiddleware(req);
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => token != null,
-    },
-    pages: {
-      signIn: "/login",
-    },
-  }
-);
+// const authMiddleware = withAuth(
+//   function onSuccess(req) {
+//     return intlMiddleware(req);
+//   },
+//   {
+//     callbacks: {
+//       authorized: ({ token }) => token != null,
+//     },
+//     pages: {
+//       signIn: "/login",
+//     },
+//   }
+// );
 
 const protectedPages = ["/dashboard"];
 
@@ -52,7 +51,7 @@ export default function middleware(req: NextRequest) {
     }
   }
   if (isPageProtected) {
-    return (authMiddleware as any)(req);
+    // return (authMiddleware as any)(req);
   } else {
     return intlMiddleware(req);
   }

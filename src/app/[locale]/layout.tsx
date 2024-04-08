@@ -2,9 +2,7 @@ import { Toaster } from "react-hot-toast";
 import Header from "../_components/header";
 import "./globals.css";
 import SideBar from "../_components/sideBar";
-import Lorem from "../_components/lorem";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
 
 export default async function LocaleLayout({
   children,
@@ -13,8 +11,7 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const session = await getServerSession();
-  const isLoggedin = session !== null;
+  const isLoggedin = false;
   return (
     <html lang={locale}>
       <body className="dark:text-white dark:bg-neutral-900 bg-white text-black transition-colors">
