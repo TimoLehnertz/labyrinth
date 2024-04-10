@@ -13,11 +13,15 @@ export default function TimeDiff({ date }: { date: Date }) {
   return <span className="text-blue-950 dark:text-blue-200">{diff}</span>;
 }
 
+function round(num: number, amount: number): number {
+  return Math.round(num / amount) * amount;
+}
+
 function getTimeDiffString(date1: Date, date2: Date) {
   const diff = Math.abs(date1.getTime() - date2.getTime()); // Get the absolute difference in milliseconds
 
   // Convert milliseconds to minutes, hours, days, weeks, months, and years
-  const seconds = Math.floor(diff / 1000);
+  const seconds = round(Math.floor(diff / 1000), 10);
   const minutes = Math.floor(diff / (1000 * 60));
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -26,7 +30,9 @@ function getTimeDiffString(date1: Date, date2: Date) {
   const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365)); // Approximation, adjust as needed
 
   // Determine the appropriate string based on the time difference
-  if (minutes < 1) {
+  if (diff < 10000) {
+    return `moments`;
+  } else if (minutes < 1) {
     return `${seconds} second${seconds !== 1 ? "s" : ""}`;
   } else if (minutes < 60) {
     return `${minutes} minute${minutes !== 1 ? "s" : ""}`;

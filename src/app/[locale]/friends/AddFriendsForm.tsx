@@ -4,21 +4,32 @@ import InlineInput from "../../_components/InlineInput";
 import { SubmitButton } from "../../_components/submit-button";
 import toast from "react-hot-toast";
 import FriendRequests from "../../_components/FriendRequests";
+import { client } from "../../clientAPI";
 
 export default function AddFriendsForm() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = {
-      friendName: formData.get("friendName"),
-    };
-    const response = await fetch("http://localhost:3001/addFriend", {
-      method: "POST",
-      credentials: "include",
-      headers: new Headers({ "content-type": "application/json" }),
-      body: JSON.stringify(data),
+    const friendUsername = formData.get("friendName")?.toString();
+    if (friendUsername === undefined) {
+      return false;
+    }
+    const response = await client.api.POST("/friends/request", {
+      params: {
+        query: {
+          username: friendUsername,
+        },
+      },
     });
-    if (response.status === 200) {
+    if (response.error?.message === "already friends") {
+      toast(`You are already friends with ${friendUsername}`);
+    } else if (response.error?.message === "already sent") {
+      toast(`A request to ${friendUsername} has been sent already`);
+    } else if (response.error?.message === "invalid user") {
+      toast(`${friendUsername} is not around. Try again!`);
+    } else if (response.error?.message === "same user") {
+      toast(`Nope, you cant be friends with yourself`);
+    } else if (response.response.status === 200) {
       toast("Friend request has been sent");
     }
     return false;

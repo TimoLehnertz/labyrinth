@@ -2,9 +2,11 @@ import React from "react";
 import { CgProfile } from "react-icons/cg";
 import Logout from "./logout";
 import Link from "next/link";
+import { server } from "../serverAPI";
 
 export default async function profileSection() {
-  if (true) {
+  const user = await server.getLoggedInUser();
+  if (!user) {
     return (
       <>
         <Link
@@ -25,7 +27,7 @@ export default async function profileSection() {
   return (
     <div className="flex space-x-2">
       <CgProfile />
-      <span>-username-</span>
+      <span>{user.username}</span>
       <Logout></Logout>
     </div>
   );

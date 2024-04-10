@@ -1,10 +1,9 @@
-import { getServerSession } from "next-auth";
+import { server } from "../../serverAPI";
 import Form from "./form";
 import { redirect } from "next/navigation";
 
 export default async function RegisterPage() {
-  const session = await getServerSession();
-  if (session) {
+  if (await server.isLoggedIn()) {
     redirect("/");
   }
   return (

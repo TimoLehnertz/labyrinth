@@ -3,6 +3,7 @@ import Header from "../_components/header";
 import "./globals.css";
 import SideBar from "../_components/sideBar";
 import Link from "next/link";
+import { server } from "../serverAPI";
 
 export default async function LocaleLayout({
   children,
@@ -11,7 +12,7 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const isLoggedin = false;
+  const isLoggedin = await server.isLoggedIn();
   return (
     <html lang={locale}>
       <body className="dark:text-white dark:bg-neutral-900 bg-white text-black transition-colors">

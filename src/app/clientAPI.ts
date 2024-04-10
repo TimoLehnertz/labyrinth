@@ -19,7 +19,7 @@ function getCookie(name: string): string | undefined {
   }
 }
 
-async function getLoggedInUser(): Promise<User | null> {
+function getLoggedInUser(): User | null {
   const token = getCookie("jwt");
   if (!token) {
     return null;
@@ -28,13 +28,37 @@ async function getLoggedInUser(): Promise<User | null> {
   return userSchema.parse(parsed.payload);
 }
 
-async function isLoggedIn(): Promise<boolean> {
-  return (await getLoggedInUser()) !== null;
+function getLoggedInUserOrThrow(): User {
+  const user = getLoggedInUser();
+  if (user === null) {
+    throw new Error("Not logged in");
+  }
+  return user;
+}
+
+function isLoggedIn(): boolean {
+  return getLoggedInUser() !== null;
 }
 
 export const client = {
   isLoggedIn,
   getLoggedInUser,
+  getLoggedInUserOrThrow,
+  getToken: () => localStorage.getItem("jwt") ?? "",
+  login: async (usernameEmail: string, password: string): Promise<boolean> => {
+    const response = await client.api.POST("/auth/login", {
+      body: {
+        usernameEmail,
+        password,
+      },
+    });
+    if (response.data) {
+      localStorage.setItem("jwt", response.data.access_token);
+      document.cookie = `jwt=${response.data.access_token};path=/`;
+      return true;
+    }
+    return false;
+  },
   api: createClient<paths>({
     baseUrl: "http://localhost:3001",
     // baseUrl: process.env.BACKEND,
@@ -52,7 +76,6 @@ export const client = {
           Authorization: `Bearer ${token}`,
         };
       }
-      console.log(options);
       return fetch(url, options);
     },
   }),

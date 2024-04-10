@@ -5,31 +5,39 @@ import PathTileElem from "./PathTileElem";
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
 
-export interface LabyrinthProps {}
+export interface LabyrinthProps {
+  seed: string;
+  boardWidth: number;
+  boardHeight: number;
+}
 
-export default function Labyrinth({}: LabyrinthProps) {
-  useEffect(() => {
-    // Create a socket connection
-    const socket = io("http://localhost:3001", {
-      withCredentials: true,
-    });
+export default function Labyrinth({
+  seed,
+  boardWidth,
+  boardHeight,
+}: LabyrinthProps) {
+  // useEffect(() => {
+  //   // Create a socket connection
+  //   const socket = io("http://localhost:3001", {
+  //     withCredentials: true,
+  //   });
 
-    // Listen for incoming messages
-    socket.on("message", (message) => {
-      console.log("received " + message);
-    });
-    socket.send("gameABC", "Hello world");
-    // Clean up the socket connection on unmount
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  //   // Listen for incoming messages
+  //   socket.on("message", (message) => {
+  //     console.log("received " + message);
+  //   });
+  //   socket.send("gameABC", "Hello world");
+  //   // Clean up the socket connection on unmount
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
 
   const game = Game.buildFromSetup({
     playerCount: 2,
-    seed: "Hello world",
-    boardHeight: 7,
-    boardWidth: 9,
+    seed,
+    boardHeight,
+    boardWidth,
   });
   const gameState = game.gameState;
   const cols = [];
@@ -39,28 +47,20 @@ export default function Labyrinth({}: LabyrinthProps) {
       colTiles.push(
         <PathTileElem
           key={`tile-${x}-${y}`}
-          openSides={
-            gameState.board.getTile(new BoardPosition(x, y)).openSides.headings
-          }
-          treasure={
-            gameState.board.getTile(new BoardPosition(x, y)).treasure?.id ??
-            null
-          }
+          pathTile={gameState.board.getTile(new BoardPosition(x, y))}
         />
       );
     }
     const col = (
-      <div key={`col${x}`} className="flex flex-col space-y-2">
+      <div key={`col${x}`} className="flex flex-col space-y-1">
         {colTiles}
       </div>
     );
     cols.push(col);
   }
-  const connect = () => {};
   return (
     <div>
-      <div className="flex flex-row w-max h-max space-x-2">{cols}</div>
-      <button onClick={connect}>Connect</button>
+      <div className="flex flex-row w-max h-max space-x-1">{cols}</div>
     </div>
   );
 }

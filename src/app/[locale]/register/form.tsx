@@ -3,21 +3,29 @@
 import { FormEvent, useState } from "react";
 import { SubmitButton } from "../../_components/submit-button";
 import toast from "react-hot-toast";
-import { SafeParseError, ZodError } from "zod";
-import { registerSchema } from "../../api/register/route";
+import { z, ZodError } from "zod";
 import { register } from "@/_lib/apiInterface";
 import BlockInput from "@/app/_components/blockInput";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { client } from "../../clientAPI";
+
+const registerSchema = z
+  .object({
+    username: z.string().min(2),
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+    email: z.string().email(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export default function Form() {
   const router = useRouter();
-  const [error, setError] = useState<ZodError<{
-    email: string;
-    password: string;
-    confirmPassword: string;
-    username: string;
-  }> | null>(null);
+  const [error, setError] = useState<ZodError<
+    z.infer<typeof registerSchema>
+  > | null>(null);
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -27,28 +35,34 @@ export default function Form() {
       confirmPassword: formData.get("confirmPassword"),
       username: formData.get("username"),
     };
-    const result = registerSchema.safeParse(form);
-    if (!result.success) {
-      setError(result.error);
+    const validated = registerSchema.safeParse(form);
+    if (!validated.success) {
+      // console.log(validated.error);
+      setError(validated.error);
       return false;
     }
-    const response = await register(result.data);
-    if (response.emailExists) {
+    const response = await client.api.POST("/users/register", {
+      body: {
+        email: validated.data.email,
+        username: validated.data.username,
+        password: validated.data.password,
+      },
+    });
+    if (response.error?.message === "email taken") {
       toast("This email is already in use");
       return false;
     }
-    if (response.usernameExists) {
+    if (response.error?.message === "username taken") {
       toast("This username is already in use");
       return false;
     }
-    const signInResponse = await signIn("credentials", {
-      email: result.data.email,
-      password: result.data.password,
-      redirect: false,
-    });
-    if (!signInResponse?.error) {
-      router.push("/");
-      router.refresh();
+    if (!response?.error) {
+      if (
+        await client.login(validated.data.username, validated.data.password)
+      ) {
+        router.push("/");
+        router.refresh();
+      }
     }
     return false;
   };

@@ -27,6 +27,9 @@ export interface paths {
     post: operations["FriendsController_addFriendRequest"];
     delete: operations["FriendsController_deleteFriendRequest"];
   };
+  "/friends/ignore-request": {
+    put: operations["FriendsController_ignoreFriendRequest"];
+  };
   "/auth/login": {
     post: operations["AuthController_login"];
   };
@@ -48,10 +51,17 @@ export interface components {
       /** @enum {string} */
       message: "email taken" | "username taken";
     };
+    User: {
+      id: string;
+      email: string;
+      username: string;
+    };
     Friendship: {
       id: string;
-      userA: string;
-      userB: string;
+      usera: string;
+      useraUser: components["schemas"]["User"];
+      userb: string;
+      userbUser: components["schemas"]["User"];
       /** Format: date-time */
       since: string;
     };
@@ -62,9 +72,12 @@ export interface components {
     FriendRequest: {
       id: string;
       initiator: string;
+      initiatorUser: components["schemas"]["User"];
       requested: string;
+      requestedUser: components["schemas"]["User"];
       /** Format: date-time */
       requestedAt: string;
+      ignored: boolean;
     };
     AddFriendRequestErrorResponse: {
       /** @enum {string} */
@@ -73,6 +86,10 @@ export interface components {
     DeleteFriendRequestErrorResponse: {
       /** @enum {string} */
       message: "request does not exist";
+    };
+    IgnoreFriendRequestErrorResponse: {
+      /** @enum {string} */
+      message: "request not exist";
     };
     SignInDto: {
       usernameEmail: string;
@@ -133,8 +150,8 @@ export interface operations {
   };
   FriendsController_deleteFriend: {
     parameters: {
-      path: {
-        user: string;
+      query: {
+        friendshipID: string;
       };
     };
     responses: {
@@ -168,8 +185,8 @@ export interface operations {
   };
   FriendsController_addFriendRequest: {
     parameters: {
-      path: {
-        user: string;
+      query: {
+        username: string;
       };
     };
     responses: {
@@ -186,8 +203,8 @@ export interface operations {
   };
   FriendsController_deleteFriendRequest: {
     parameters: {
-      path: {
-        user: string;
+      query: {
+        requestID: string;
       };
     };
     responses: {
@@ -198,6 +215,24 @@ export interface operations {
       400: {
         content: {
           "application/json": components["schemas"]["DeleteFriendRequestErrorResponse"];
+        };
+      };
+    };
+  };
+  FriendsController_ignoreFriendRequest: {
+    parameters: {
+      query: {
+        requestID: string;
+      };
+    };
+    responses: {
+      /** @description request was ignored */
+      200: {
+        content: never;
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["IgnoreFriendRequestErrorResponse"];
         };
       };
     };

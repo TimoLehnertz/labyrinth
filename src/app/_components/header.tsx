@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { getServerSession } from "next-auth";
 import ThemeToggle from "./ThemeToggle";
-import Logout from "./logout";
 import Image from "next/image";
 import ProfileSection from "./profileSection";
 
