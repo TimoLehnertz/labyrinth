@@ -10,9 +10,9 @@ export interface FriendProps {
 }
 
 export default function Friend({ friendship, endFriendship }: FriendProps) {
-  const ownUser = client.getLoggedInUserOrThrow();
+  const ownUser = client.useUser();
   let friendUser: components["schemas"]["User"] | null = null;
-  if (ownUser.id === friendship.usera) {
+  if (ownUser?.id === friendship.usera) {
     friendUser = friendship.userbUser;
   } else {
     friendUser = friendship.useraUser;

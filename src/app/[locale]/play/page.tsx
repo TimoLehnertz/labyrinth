@@ -14,7 +14,7 @@ export default function page() {
         </div>
       </div>
       <div className="flex flex-row justify-center mt-10">
-        <Labyrinth boardHeight={7} boardWidth={7} seed="ds"></Labyrinth>
+        <Labyrinth boardHeight={9} boardWidth={9} seed="seed"></Labyrinth>
       </div>
     </div>
   );

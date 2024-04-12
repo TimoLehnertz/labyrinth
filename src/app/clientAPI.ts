@@ -1,9 +1,11 @@
+"use client";
 import type { paths } from "./backend";
 import createClient from "openapi-fetch";
 import { decode, verify } from "jwt-js-decode";
 import { z } from "zod";
+import { useState } from "react";
 
-export const userSchema = z.object({
+const userSchema = z.object({
   id: z.string().uuid(),
   username: z.string(),
   email: z.string().email(),
@@ -12,6 +14,14 @@ export const userSchema = z.object({
 export type User = z.infer<typeof userSchema>;
 
 function getCookie(name: string): string | undefined {
+  try {
+    if (document === undefined) {
+      // weird stuff
+      return undefined;
+    }
+  } catch (e) {
+    return undefined;
+  }
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) {
@@ -19,31 +29,35 @@ function getCookie(name: string): string | undefined {
   }
 }
 
-function getLoggedInUser(): User | null {
+function useUser(): User | null {
   const token = getCookie("jwt");
   if (!token) {
-    return null;
+    const [user, setUser] = useState<User | null>(null);
+    return user;
   }
   const parsed = decode(token);
-  return userSchema.parse(parsed.payload);
-}
-
-function getLoggedInUserOrThrow(): User {
-  const user = getLoggedInUser();
-  if (user === null) {
-    throw new Error("Not logged in");
-  }
+  const [user, setUser] = useState<User | null>(
+    userSchema.parse(parsed.payload)
+  );
   return user;
 }
 
-function isLoggedIn(): boolean {
-  return getLoggedInUser() !== null;
+// function useUserOrThrow(): User {
+//   const user = useUser();
+//   if (user === null) {
+//     throw new Error("Not logged in");
+//   }
+//   return user;
+// }
+
+function useIsLoggedIn(): boolean {
+  return useUser() !== null;
 }
 
 export const client = {
-  isLoggedIn,
-  getLoggedInUser,
-  getLoggedInUserOrThrow,
+  useIsLoggedIn,
+  useUser,
+  // useUserOrThrow,
   getToken: () => localStorage.getItem("jwt") ?? "",
   login: async (usernameEmail: string, password: string): Promise<boolean> => {
     const response = await client.api.POST("/auth/login", {

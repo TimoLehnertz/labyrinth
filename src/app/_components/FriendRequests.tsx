@@ -1,55 +1,14 @@
 "use client";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import FriendRequest from "./FriendRequest";
 import Friend from "./Friend";
 import { client } from "../clientAPI";
 import { components } from "../backend";
 import toast from "react-hot-toast";
+import { useEntity } from "../utils/UseEntity";
 
 type FriendRequest = components["schemas"]["FriendRequest"];
 type Friendship = components["schemas"]["Friendship"];
-
-function useEntity<T>(
-  namespace: string,
-  property: string
-): [T[], Dispatch<SetStateAction<T[]>>] {
-  const [entities, setEntities] = useState<T[]>([]);
-  useEffect(() => {
-    const sendRequestsSocket = io(`http://localhost:3001/${namespace}`, {
-      withCredentials: true,
-      transports: ["websocket"],
-      auth: { Bearer: client.getToken() },
-      extraHeaders: {
-        Bearer: client.getToken(),
-      },
-    });
-    sendRequestsSocket.auth = {
-      Bearer: client.getToken(),
-    };
-    sendRequestsSocket.emit(property);
-    sendRequestsSocket.on("init", (data) => {
-      console.log(`init of ${namespace}/${property}: `, data);
-      setEntities(data);
-    });
-    sendRequestsSocket.on("add", (data) => {
-      console.log(`added ${namespace}/${property}: `, data);
-      setEntities((prevEntities) => prevEntities.concat([data]));
-    });
-    sendRequestsSocket.on("remove", (removal) => {
-      console.log(`removed ${namespace}/${property}: `, removal);
-      setEntities((prevEntities) =>
-        prevEntities.filter((entity) => {
-          (entity as any).id !== removal.id;
-        })
-      );
-    });
-    return () => {
-      sendRequestsSocket.disconnect();
-    };
-  }, [namespace, property]);
-  return [entities, setEntities];
-}
 
 export default function FriendRequests() {
   const [sentRequests] = useEntity<FriendRequest>("friends", "sent-requests");

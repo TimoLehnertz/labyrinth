@@ -3,7 +3,14 @@ import { cookies } from "next/headers";
 import type { paths } from "./backend";
 import createClient from "openapi-fetch";
 import { decode, verify } from "jwt-js-decode";
-import { User, userSchema } from "./clientAPI";
+import { User } from "./clientAPI";
+import { z } from "zod";
+
+const userSchema = z.object({
+  id: z.string().uuid(),
+  username: z.string(),
+  email: z.string().email(),
+});
 
 async function getLoggedInUser(): Promise<User | null> {
   const token = cookies().get("jwt")?.value;

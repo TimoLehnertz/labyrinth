@@ -17,10 +17,10 @@ export default function FriendRequest({
   ignore,
   deny,
 }: FriendRequestProps) {
-  const ownUser = client.getLoggedInUserOrThrow();
+  const ownUser = client.useUser();
   let isIncoming = false;
   let otherUser: components["schemas"]["User"];
-  if (ownUser.id === friendRequest.initiator) {
+  if (ownUser?.id === friendRequest.initiator) {
     // this is a sent friend request
     otherUser = friendRequest.requestedUser;
   } else {

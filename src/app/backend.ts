@@ -36,6 +36,32 @@ export interface paths {
   "/auth/profile": {
     get: operations["AuthController_getProfile"];
   };
+  "/game": {
+    get: operations["GameController_findOne"];
+    put: operations["GameController_update"];
+    post: operations["GameController_create"];
+  };
+  "/game/move": {
+    post: operations["GameController_move"];
+  };
+  "/game/availableToJoin": {
+    get: operations["GameController_findAvailableToJoin"];
+  };
+  "/game/players": {
+    get: operations["GameController_findPlayers"];
+  };
+  "/game/join": {
+    post: operations["GameController_join"];
+  };
+  "/game/ready": {
+    put: operations["GameController_setReady"];
+  };
+  "/game/leave": {
+    delete: operations["GameController_leaveGame"];
+  };
+  "/game/makeAdmin": {
+    put: operations["GameController_makeAdmin"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -97,6 +123,105 @@ export interface components {
     };
     LoginResponse: {
       access_token: string;
+    };
+    CardRatiosDto: {
+      lCards: number;
+      streightCards: number;
+      tCards: number;
+    };
+    TreasureCardChancesDto: {
+      lCardTreasureChance: number;
+      streightCardTreasureChance: number;
+      tCardTreasureChance: number;
+      fixCardTreasureChance: number;
+    };
+    GameSetupDto: {
+      seed: string;
+      playerCount: number;
+      boardWidth: number;
+      boardHeight: number;
+      cardsRatio: components["schemas"]["CardRatiosDto"];
+      treasureCardChances: components["schemas"]["TreasureCardChancesDto"];
+    };
+    CreateGameDto: {
+      /** @enum {string} */
+      visibility: "public" | "friends" | "private";
+      gameSetup: components["schemas"]["GameSetupDto"];
+    };
+    CreateGameResponse: {
+      gameID: string;
+    };
+    CreateGameErrorResponse: {
+      /** @enum {string} */
+      message: "invalid setup";
+    };
+    Game: {
+      id: string;
+      /** @enum {string} */
+      visibility: "public" | "friends" | "private";
+      /** Format: date-time */
+      startTime: string;
+      gameState: string;
+      gameSetup: string;
+      ownerUserID: string;
+      ownerUser: components["schemas"]["User"];
+      finished: boolean;
+      started: boolean;
+    };
+    GetErrorResponse: Record<string, never>;
+    UpdateGameDto: {
+      /** @enum {string} */
+      visibility: "public" | "friends" | "private";
+      gameSetup: components["schemas"]["GameSetupDto"];
+      id: string;
+      ownerID?: string;
+    };
+    UpdateGameErrorResponse: {
+      /** @enum {string} */
+      message: "game does not exist" | "invalid setup" | "no permission" | "game has already started";
+    };
+    ShiftPositionDto: {
+      /** @enum {number} */
+      heading: 0 | 1 | 2 | 3;
+      index: number;
+    };
+    BoardPositionDto: {
+      x: number;
+      y: number;
+    };
+    MoveDto: {
+      playerIndex: number;
+      rotateBeforeShift: number;
+      shiftPosition: components["schemas"]["ShiftPositionDto"];
+      from: components["schemas"]["BoardPositionDto"];
+      to: components["schemas"]["BoardPositionDto"];
+      collectedTreasure: number | null;
+    };
+    MoveErrorResponse: {
+      /** @enum {string} */
+      message: "game does not exist" | "invalid move" | "the game did not start yet";
+    };
+    PlayerPlaysGame: {
+      id: string;
+      /** @enum {string} */
+      botType: "player" | "weak_bot";
+      gameID: string;
+      userID: string | null;
+      user: components["schemas"]["User"] | null;
+      playerIndex: number;
+      ready: boolean;
+    };
+    JoinErrorResponse: {
+      /** @enum {string} */
+      message: "game does not exist" | "already playing" | "user does not exist";
+    };
+    RemoveGamePlayerErrorResponse: {
+      /** @enum {string} */
+      message: "game does not exist" | "no permission" | "game has already started";
+    };
+    MakeAdminErrorResponse: {
+      /** @enum {string} */
+      message: "game does not exist" | "no permission";
     };
   };
   responses: never;
@@ -260,6 +385,172 @@ export interface operations {
       200: {
         content: {
           "application/json": Record<string, never>;
+        };
+      };
+    };
+  };
+  GameController_findOne: {
+    parameters: {
+      query: {
+        gameID: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Game"];
+        };
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["GetErrorResponse"];
+        };
+      };
+    };
+  };
+  GameController_update: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateGameDto"];
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["UpdateGameErrorResponse"];
+        };
+      };
+    };
+  };
+  GameController_create: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateGameDto"];
+      };
+    };
+    responses: {
+      201: {
+        content: {
+          "application/json": components["schemas"]["CreateGameResponse"];
+        };
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["CreateGameErrorResponse"];
+        };
+      };
+    };
+  };
+  GameController_move: {
+    parameters: {
+      query: {
+        game: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MoveDto"];
+      };
+    };
+    responses: {
+      201: {
+        content: never;
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["MoveErrorResponse"];
+        };
+      };
+    };
+  };
+  GameController_findAvailableToJoin: {
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Game"][];
+        };
+      };
+    };
+  };
+  GameController_findPlayers: {
+    parameters: {
+      query: {
+        gameID: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["PlayerPlaysGame"][];
+        };
+      };
+    };
+  };
+  GameController_join: {
+    parameters: {
+      query: {
+        game: string;
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["JoinErrorResponse"];
+        };
+      };
+    };
+  };
+  GameController_setReady: {
+    parameters: {
+      query: {
+        game: string;
+        ready: boolean;
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+    };
+  };
+  GameController_leaveGame: {
+    parameters: {
+      query: {
+        gameID: string;
+        userIndex: number;
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["RemoveGamePlayerErrorResponse"];
+        };
+      };
+    };
+  };
+  GameController_makeAdmin: {
+    parameters: {
+      query: {
+        gameID: string;
+        userID: string;
+      };
+    };
+    responses: {
+      200: {
+        content: never;
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["MakeAdminErrorResponse"];
         };
       };
     };
