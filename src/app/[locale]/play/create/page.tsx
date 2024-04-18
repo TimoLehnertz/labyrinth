@@ -31,10 +31,6 @@ export default function Page() {
   const router = useRouter();
   const [visibility, setVisibility] = useState<VisibilityInterface>(options[0]);
 
-//   useEffect(() => {
-    
-//   }, []);
-
   const visibilityChanged = (e: any) => {
     for (const option of options) {
       if (option.value === e.target.value) {
@@ -55,7 +51,7 @@ export default function Page() {
     }
 
     const gameID = response.data?.gameID;
-    router.push(`/play/${gameID}`);
+    router.push(`/play/${gameID}/lobby`);
   };
 
   return (

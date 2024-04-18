@@ -1,7 +1,7 @@
 "use client";
 import { Board, CardRatios, TreasureCardChances } from "labyrinth-game-logic";
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { activities, animalNames } from "../create/animals";
+import { activities, animalNames } from "./animals";
 import CardRatiosSettings from "./CardRatiosSettings";
 import TreasureDistributionSettings from "./TreasureDistributionSettings";
 import Labyrinth from "@/app/_components/Labyrinth/Labyrinth";
@@ -11,10 +11,11 @@ import { io } from "socket.io-client";
 import { components } from "@/app/backend";
 import toast from "react-hot-toast";
 import GameLobby from "./GameLobby";
+import { useRouter } from "next/navigation";
 
 type DbGame = components["schemas"]["Game"];
 
-function useGame(
+export function useGame(
   initialGame: DbGame,
   user: User
 ): [DbGame, (game: DbGame) => void, boolean, boolean] {
@@ -108,15 +109,22 @@ export default function GameSettings({ initialGame, user }: Props) {
     initialGame,
     user
   );
+  const router = useRouter();
 
   // console.log("edit: ", allowEdit);
+  // useEffect(() => {
+  //   const newGameSetup = { ...game };
+  //   const setup = JSON.parse(newGameSetup.gameSetup);
+  //   setup.seed = generateRandomSeed();
+  //   newGameSetup.gameSetup = JSON.stringify(setup);
+  //   setGameSetup(newGameSetup);
+  // }, [game]);
+
   useEffect(() => {
-    const newGameSetup = { ...game };
-    const setup = JSON.parse(newGameSetup.gameSetup);
-    setup.seed = generateRandomSeed();
-    newGameSetup.gameSetup = JSON.stringify(setup);
-    setGameSetup(newGameSetup);
-  }, []);
+    if (game.started) {
+      router.push(`/play/${game.id}`);
+    }
+  }, [game, router]);
 
   const cardRatiosChanged = (cardRatios: CardRatios) => {
     const newGameSetup = { ...game };

@@ -46,8 +46,11 @@ export default function Labyrinth({
     for (let y = 0; y < gameState.board.height; y++) {
       colTiles.push(
         <PathTileElem
+          x={x}
+          y={y}
           key={`tile-${x}-${y}`}
-          pathTile={gameState.board.getTile(new BoardPosition(x, y))}
+          gameState={game.gameState}
+          ownPlayerIndex={null}
         />
       );
     }

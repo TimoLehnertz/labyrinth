@@ -20,9 +20,9 @@ export default async function page() {
       <div className="flex justify-center mt-10">
         <div className="flex flex-row space-x-5">
           {res.data.map((e, i) => (
-            <PrimaryButton>
-              <Link key={i} href={`/play/${e.id}`}>
-                <b>{e.ownerUser.username}</b>'s game
+            <PrimaryButton key={"btn" + i}>
+              <Link key={i} href={`/play/${e.id}/lobby`}>
+                <b>{e.ownerUser.username}</b>&apos;s game
               </Link>
             </PrimaryButton>
           ))}

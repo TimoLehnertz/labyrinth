@@ -1,20 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { server } from "@/app/serverAPI";
-import GameSettings from "./GameSettings";
 import { redirect } from "next/navigation";
-import GameLobby from "./GameLobby";
+import LabyrinthGameUI from "./LabyrinthGameUI";
 
 interface Props {
   params: {
     gameID: string;
   };
 }
-
 export default async function Page({ params }: Props) {
   const user = await server.getLoggedInUser();
   if (user === null) {
     redirect("/");
-    return;
   }
   const response = await server.api.GET("/game", {
     params: {
@@ -25,11 +22,28 @@ export default async function Page({ params }: Props) {
   });
   if (response.error || !response.data) {
     redirect("/");
-    return;
+  }
+  const gamePlayersRes = await server.api.GET("/game/players", {
+    params: {
+      query: {
+        gameID: params.gameID,
+      },
+    },
+  });
+  let ownPlayerIndex = null;
+  if (gamePlayersRes.data) {
+    for (const gamePlayer of gamePlayersRes.data) {
+      if (gamePlayer.userID === user.id) {
+        ownPlayerIndex = gamePlayer.playerIndex;
+        break;
+      }
+    }
   }
   return (
-    <div>
-      <GameSettings initialGame={response.data} user={user}></GameSettings>
-    </div>
+    <LabyrinthGameUI
+      initialGame={response.data}
+      user={user}
+      ownPlayerIndex={ownPlayerIndex}
+    />
   );
 }

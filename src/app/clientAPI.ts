@@ -32,14 +32,10 @@ function getCookie(name: string): string | undefined {
 function useUser(): User | null {
   const token = getCookie("jwt");
   if (!token) {
-    const [user, setUser] = useState<User | null>(null);
-    return user;
+    return null;
   }
   const parsed = decode(token);
-  const [user, setUser] = useState<User | null>(
-    userSchema.parse(parsed.payload)
-  );
-  return user;
+  return userSchema.parse(parsed.payload);
 }
 
 // function useUserOrThrow(): User {

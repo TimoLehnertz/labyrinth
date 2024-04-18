@@ -17,15 +17,22 @@ async function getLoggedInUser(): Promise<User | null> {
   if (!token) {
     return null;
   }
-  if (!process.env.AUTH_SECRET) {
-    throw new Error("AUTH_SECRET not provided");
-  }
-  const res = await verify(token, process.env.AUTH_SECRET);
-  if (!res) {
-    return null;
-  }
-  const parsed = decode(token);
-  return userSchema.parse(parsed.payload);
+  // if (!process.env.AUTH_SECRET) {
+  //   throw new Error("AUTH_SECRET not provided");
+  // }
+  // const res = await verify(token, process.env.AUTH_SECRET);
+  // if (!res) {
+  //   return null;
+  // }
+  // const parsed = decode(token);
+  // const tokenUser = userSchema.parse(parsed.payload);
+  try {
+    const user = await server.api.GET("/auth/profile");
+    if (user.data) {
+      return user.data;
+    }
+  } catch (e) {}
+  return null;
 }
 
 async function isLoggedIn(): Promise<boolean> {

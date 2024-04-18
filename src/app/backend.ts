@@ -50,6 +50,9 @@ export interface paths {
   "/game/players": {
     get: operations["GameController_findPlayers"];
   };
+  "/game/ownGames": {
+    get: operations["GameController_findOwnGames"];
+  };
   "/game/join": {
     post: operations["GameController_join"];
   };
@@ -192,7 +195,8 @@ export interface components {
     MoveDto: {
       playerIndex: number;
       rotateBeforeShift: number;
-      shiftPosition: components["schemas"]["ShiftPositionDto"];
+      fromShiftPosition: components["schemas"]["ShiftPositionDto"];
+      toShiftPosition: components["schemas"]["ShiftPositionDto"];
       from: components["schemas"]["BoardPositionDto"];
       to: components["schemas"]["BoardPositionDto"];
       collectedTreasure: number | null;
@@ -213,7 +217,7 @@ export interface components {
     };
     JoinErrorResponse: {
       /** @enum {string} */
-      message: "game does not exist" | "already playing" | "user does not exist";
+      message: "game does not exist" | "already playing" | "user does not exist" | "game has already started";
     };
     RemoveGamePlayerErrorResponse: {
       /** @enum {string} */
@@ -384,7 +388,7 @@ export interface operations {
     responses: {
       200: {
         content: {
-          "application/json": Record<string, never>;
+          "application/json": components["schemas"]["User"];
         };
       };
     };
@@ -485,6 +489,15 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["PlayerPlaysGame"][];
+        };
+      };
+    };
+  };
+  GameController_findOwnGames: {
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Game"][];
         };
       };
     };

@@ -4,6 +4,10 @@ import "./globals.css";
 import SideBar from "../_components/sideBar";
 import Link from "next/link";
 import { server } from "../serverAPI";
+import { components } from "../backend";
+import SecondaryButton from "../_components/buttons/SecondaryButton";
+
+type Game = components["schemas"]["Game"];
 
 export default async function LocaleLayout({
   children,
@@ -12,7 +16,14 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const isLoggedin = await server.isLoggedIn();
+  const isLoggedIn = await server.isLoggedIn();
+  let ownGames: Game[] = [];
+  if (isLoggedIn) {
+    const res = await server.api.GET("/game/ownGames");
+    if (res.data) {
+      ownGames = res.data;
+    }
+  }
   return (
     <html lang={locale}>
       <body className="dark:text-white dark:bg-neutral-900 bg-white text-black transition-colors">
@@ -20,7 +31,7 @@ export default async function LocaleLayout({
         <div className="relative">
           <SideBar>
             <ul>
-              {isLoggedin && (
+              {isLoggedIn && (
                 <>
                   <li>
                     <Link href="/friends">Friends</Link>
@@ -31,6 +42,18 @@ export default async function LocaleLayout({
                 </>
               )}
             </ul>
+            {isLoggedIn && ownGames.length > 0 && (
+              <>
+                <p className="mt-4 mb-1">Own games</p>
+                <div className="flex flex-col gap-2">
+                  {ownGames.map((game, i) => (
+                    <SecondaryButton key={i} href={`/play/${game.id}`}>
+                      {"#" + i + (game.started ? " started" : " lobby")}
+                    </SecondaryButton>
+                  ))}
+                </div>
+              </>
+            )}
           </SideBar>
           <main className="p-4 sm:ml-64">{children}</main>
         </div>
