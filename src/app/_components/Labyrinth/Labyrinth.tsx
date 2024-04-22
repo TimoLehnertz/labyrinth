@@ -1,9 +1,7 @@
 "use client";
 import React from "react";
-import { BoardPosition, Game } from "labyrinth-game-logic";
-import PathTileElem from "./PathTileElem";
-import { useState, useEffect } from "react";
-import io from "socket.io-client";
+import { Game, Heading, ShiftPosition } from "labyrinth-game-logic";
+import { getTile } from "./LabyrinthMoveCreator";
 
 export interface LabyrinthProps {
   seed: string;
@@ -40,30 +38,32 @@ export default function Labyrinth({
     boardWidth,
   });
   const gameState = game.gameState;
-  const cols = [];
-  for (let x = 0; x < gameState.board.width; x++) {
-    const colTiles = [];
-    for (let y = 0; y < gameState.board.height; y++) {
-      colTiles.push(
-        <PathTileElem
-          x={x}
-          y={y}
-          key={`tile-${x}-${y}`}
-          gameState={game.gameState}
-          ownPlayerIndex={null}
-        />
+  const cards = [];
+  for (let y = 0; y < gameState.board.height + 2; y++) {
+    for (let x = 0; x < gameState.board.width + 2; x++) {
+      cards.push(
+        getTile(
+          x,
+          y,
+          gameState,
+          new ShiftPosition(Heading.NORTH, 1),
+          () => {},
+          null,
+          `${Math.random()}`,
+          [],
+          () => {}
+        )
       );
     }
-    const col = (
-      <div key={`col${x}`} className="flex flex-col space-y-1">
-        {colTiles}
-      </div>
-    );
-    cols.push(col);
   }
   return (
-    <div>
-      <div className="flex flex-row w-max h-max space-x-1">{cols}</div>
+    <div
+      className="grid gap-[0.1rem] max-w-[50rem] flex-grow"
+      style={{
+        gridTemplateColumns: `repeat(${gameState.board.width + 2}, minmax(0, 1fr))`,
+      }}
+    >
+      {cards}
     </div>
   );
 }

@@ -89,7 +89,7 @@ function getShiftPositionTile(
   );
 }
 
-function getTile(
+export function getTile(
   x: number,
   y: number,
   gameState: GameState,
@@ -244,17 +244,15 @@ export default function LabyrinthMoveCreator({
 
   return (
     <div>
-      <div>
-        <div
-          className="grid gap-[0.1rem]"
-          style={{
-            gridTemplateColumns: `repeat(${gameState.board.width + 2}, minmax(0, 1fr))`,
-          }}
-        >
-          {cards}
-        </div>
+      <div
+        className="grid gap-[0.1rem] max-w-[50rem] flex-grow"
+        style={{
+          gridTemplateColumns: `repeat(${gameState.board.width + 2}, minmax(0, 1fr))`,
+        }}
+      >
+        {cards}
       </div>
-      <div className="flex gap-2 mt-5">
+      <div className="flex gap-2 mt-3 p-2">
         {isToMove && !displayPositions && (
           <>
             <SecondaryButton onClick={() => rotate(false)}>

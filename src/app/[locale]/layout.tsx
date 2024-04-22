@@ -55,7 +55,7 @@ export default async function LocaleLayout({
               </>
             )}
           </SideBar>
-          <main className="p-4 sm:ml-64">{children}</main>
+          <main className="sm:ml-64">{children}</main>
         </div>
         <Toaster position="top-right"></Toaster>
       </body>

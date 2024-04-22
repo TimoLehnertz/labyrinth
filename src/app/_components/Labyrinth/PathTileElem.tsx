@@ -6,6 +6,7 @@ import {
   BoardPosition,
   Game,
   GameState,
+  OpenSides,
   PathTile,
   TileType,
 } from "labyrinth-game-logic";
@@ -116,7 +117,7 @@ function buildPlayerIndicators(
     playerIndicators.push(
       <div
         key={i}
-        className="rounded-full w-3 h-3 border mr-[-0.1rem]"
+        className="rounded-full w-4 h-4 border mr-[-0.1rem]"
         style={{ backgroundColor: playerIndexToColor(playerIndex) }}
       ></div>
     );
@@ -127,6 +128,49 @@ function buildPlayerIndicators(
       {playerIndicators}
     </div>
   );
+}
+
+function buildOverlay(openSides: OpenSides) {
+  const content = [];
+  if (openSides.northOpen) {
+    content.push(
+      <div
+        key={"north"}
+        className="absolute top-0 right-[33%] bottom-[66%] left-[33%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+      ></div>
+    );
+  }
+  if (openSides.eastOpen) {
+    content.push(
+      <div
+        key={"east"}
+        className="absolute top-[33%] right-0 bottom-[33%] left-[66%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+      ></div>
+    );
+  }
+  if (openSides.southOpen) {
+    content.push(
+      <div
+        key={"south"}
+        className="absolute top-[66%] right-[33%] bottom-0 left-[33%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+      ></div>
+    );
+  }
+  if (openSides.westOpen) {
+    content.push(
+      <div
+        key={"west"}
+        className="absolute top-[33%] right-[66%] bottom-[33%] left-0 bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+      ></div>
+    );
+  }
+  content.push(
+    <div
+      key={"center"}
+      className="absolute top-[33%] right-[33%] bottom-[33%] left-[33%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+    ></div>
+  );
+  return <div className="absolute inset-0">{content}</div>;
 }
 
 export interface Props {
@@ -159,10 +203,10 @@ export default function PathTileElem({
     treasureImage = (
       <Image
         src={treasureIDToPath(pathTile.treasure.id)}
-        width={50}
-        height={50}
+        width={100}
+        height={100}
         alt=""
-        className="absolute inset-0 scale-[35%]"
+        className="absolute inset-0 scale-[45%]"
       ></Image>
     );
   }
@@ -185,17 +229,18 @@ export default function PathTileElem({
   };
 
   return (
-    <div className="relative aspect-square" onClick={clicked}>
+    <div className="relative aspect-square group/tile" onClick={clicked}>
       <Image
         className={rotationToClass(pathTile.rotation) + " absolute inset-0"}
         src={imagePath}
         alt=""
-        width={400}
-        height={400}
+        width={200}
+        height={200}
       ></Image>
-      {displayDot && (
+      {displayDot && buildOverlay(pathTile.openSides)}
+      {/* {displayDot && (
         <div className="absolute inset-0 rounded-full bg-slate-700 scale-[45%] opacity-70"></div>
-      )}
+      )} */}
       {treasureImage}
       {homePosition}
       {x !== undefined &&

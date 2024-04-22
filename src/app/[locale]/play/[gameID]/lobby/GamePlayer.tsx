@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import SecondaryButton from "@/app/_components/buttons/SecondaryButton";
 import toast from "react-hot-toast";
 import { playerIndexToColor } from "@/app/_components/Labyrinth/PathTileElem";
+import { getBotName, parseBotType } from "../LabyrinthGameUI";
 
 type GamePlayer = components["schemas"]["PlayerPlaysGame"];
 type Game = components["schemas"]["Game"];
@@ -24,8 +25,8 @@ export default function GamePlayer({ gamePlayer, game }: Props) {
     setSelf(user?.id === gamePlayer.userID);
     setHost(game.ownerUserID === gamePlayer.userID);
     setMeHost(user?.id === game.ownerUserID);
-    setBot(gamePlayer.botType !== "player");
-  }, [user, game]);
+    setBot(gamePlayer.botType !== null);
+  }, [user?.id, game, gamePlayer]);
   const makeAdmin = async () => {
     if (gamePlayer.userID === null) {
       return;
@@ -56,6 +57,23 @@ export default function GamePlayer({ gamePlayer, game }: Props) {
       toast.error("an error occured");
     }
   };
+  let name = <span>-</span>;
+  if (isSelf) {
+    name = <span>You</span>;
+  } else if (gamePlayer.botType !== null) {
+    const botName = getBotName(gamePlayer.id);
+    const botType = parseBotType(gamePlayer.botType);
+    name = (
+      <span>
+        <span>{botName}</span>
+        <span className="text-gray-400 bg-slate-800 rounded ml-1">
+          ({botType})
+        </span>
+      </span>
+    );
+  } else if (gamePlayer.user !== null) {
+    name = <span>{gamePlayer.user.username}</span>;
+  }
   return (
     <div className="flex flex-row gap-2">
       <div
@@ -71,7 +89,7 @@ export default function GamePlayer({ gamePlayer, game }: Props) {
         className="flex min-w-16"
         style={{ color: gamePlayer.ready ? "green" : "red" }}
       >
-        {isSelf ? "You" : gamePlayer.user?.username}
+        {name}
         <div className="ml-2" style={{ color: "#CCC" }}>
           {isHost ? "(Host)" : ""}
         </div>

@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 
 type GamePlayer = components["schemas"]["PlayerPlaysGame"];
 type Game = components["schemas"]["Game"];
+type BotType = components["schemas"]["PlayerPlaysGame"]["botType"];
 
 interface Props {
   game: Game;
@@ -19,14 +20,16 @@ export default function GameLobby({ game }: Props) {
   const router = useRouter();
   const [gamePlayers] = useEntity<GamePlayer>("game", "getPlayers", game.id);
   const user = client.useUser();
-  let [isReady, setReady] = useState<boolean>(false);
-  let [isJoined, setJoined] = useState<boolean>(false);
-  let [isFull, setFull] = useState<boolean>(false);
-  let [ownPlayer, setOwnPlayer] = useState<GamePlayer | null>(null);
+  const [isReady, setReady] = useState<boolean>(false);
+  const [isJoined, setJoined] = useState<boolean>(false);
+  const [isFull, setFull] = useState<boolean>(false);
+  const [ownPlayer, setOwnPlayer] = useState<GamePlayer | null>(null);
+  const [isHost, setHost] = useState(false);
 
   useEffect(() => {
     setJoined(false);
     setFull(gamePlayers.length >= JSON.parse(game.gameSetup).playerCount);
+    setHost(game.ownerUserID === user?.id);
     for (const gamePlayer of gamePlayers) {
       if (gamePlayer.userID === user?.id) {
         setJoined(true);
@@ -35,7 +38,7 @@ export default function GameLobby({ game }: Props) {
         break;
       }
     }
-  }, [gamePlayers, game]);
+  }, [gamePlayers, game, user?.id]);
 
   const toggleReady = async () => {
     const res = await client.api.PUT("/game/ready", {
@@ -72,12 +75,28 @@ export default function GameLobby({ game }: Props) {
     const res = await client.api.POST("/game/join", {
       params: {
         query: {
-          game: game.id,
+          gameID: game.id,
         },
       },
     });
     if (res.error) {
       toast("an error occured");
+    }
+  };
+  const addBot = async (botType: BotType) => {
+    if (botType === null) {
+      return;
+    }
+    const res = await client.api.POST("/game/addBot", {
+      params: {
+        query: {
+          botType,
+          gameID: game.id,
+        },
+      },
+    });
+    if (res.error) {
+      toast(res.error.message);
     }
   };
   return (
@@ -97,11 +116,29 @@ export default function GameLobby({ game }: Props) {
           <GamePlayer gamePlayer={player} game={game} key={i}></GamePlayer>
         ))}
       </div>
-      <div className="mt-5">
+      <div className="mt-5 flex gap-2">
         {isJoined ? (
           <PrimaryButton onClick={toggleReady}>
             {isReady ? "Ready" : "Not ready"}
           </PrimaryButton>
+        ) : (
+          <></>
+        )}
+        {isJoined && isHost && !isFull ? (
+          <>
+            <SecondaryButton
+              className="ml-4"
+              onClick={() => addBot("weak_bot")}
+            >
+              Add weak bot
+            </SecondaryButton>
+            <SecondaryButton onClick={() => addBot("medium_bot")}>
+              Add medium bot
+            </SecondaryButton>
+            <SecondaryButton onClick={() => addBot("strong_bot")}>
+              Add strong bot
+            </SecondaryButton>
+          </>
         ) : (
           <></>
         )}

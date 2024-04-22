@@ -56,6 +56,9 @@ export interface paths {
   "/game/join": {
     post: operations["GameController_join"];
   };
+  "/game/addBot": {
+    post: operations["GameController_addBot"];
+  };
   "/game/ready": {
     put: operations["GameController_setReady"];
   };
@@ -84,6 +87,8 @@ export interface components {
       id: string;
       email: string;
       username: string;
+      gamesWon: number;
+      gamesLost: number;
     };
     Friendship: {
       id: string;
@@ -140,7 +145,6 @@ export interface components {
     };
     GameSetupDto: {
       seed: string;
-      playerCount: number;
       boardWidth: number;
       boardHeight: number;
       cardsRatio: components["schemas"]["CardRatiosDto"];
@@ -207,17 +211,23 @@ export interface components {
     };
     PlayerPlaysGame: {
       id: string;
-      /** @enum {string} */
-      botType: "player" | "weak_bot";
+      /** @enum {string|null} */
+      botType: "weak_bot" | "medium_bot" | "strong_bot" | null;
       gameID: string;
       userID: string | null;
       user: components["schemas"]["User"] | null;
       playerIndex: number;
       ready: boolean;
+      isWinner: boolean;
+      gameFinished: boolean;
     };
     JoinErrorResponse: {
       /** @enum {string} */
-      message: "game does not exist" | "already playing" | "user does not exist" | "game has already started";
+      message: "game does not exist" | "already playing" | "user does not exist" | "game has already started" | "game full";
+    };
+    AddBotErrorResponse: {
+      /** @enum {string} */
+      message: "game does not exist" | "no permission" | "game has already started" | "game full";
     };
     RemoveGamePlayerErrorResponse: {
       /** @enum {string} */
@@ -505,7 +515,7 @@ export interface operations {
   GameController_join: {
     parameters: {
       query: {
-        game: string;
+        gameID: string;
       };
     };
     responses: {
@@ -515,6 +525,24 @@ export interface operations {
       400: {
         content: {
           "application/json": components["schemas"]["JoinErrorResponse"];
+        };
+      };
+    };
+  };
+  GameController_addBot: {
+    parameters: {
+      query: {
+        gameID: string;
+        botType: "weak_bot" | "medium_bot" | "strong_bot";
+      };
+    };
+    responses: {
+      201: {
+        content: never;
+      };
+      400: {
+        content: {
+          "application/json": components["schemas"]["AddBotErrorResponse"];
         };
       };
     };

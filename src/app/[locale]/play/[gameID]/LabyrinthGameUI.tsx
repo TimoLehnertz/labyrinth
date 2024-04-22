@@ -1,12 +1,17 @@
 "use client";
 import { components } from "@/app/backend";
 import { client, User } from "@/app/clientAPI";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useGame } from "./lobby/GameSettings";
 import { useRouter } from "next/navigation";
 import { useEntity } from "@/app/utils/UseEntity";
 import GamePlayerArea from "./GamePlayerArea";
-import { Game, GameState, Move } from "labyrinth-game-logic";
+import {
+  Game,
+  GameState,
+  Move,
+  RandomNumberGenerator,
+} from "labyrinth-game-logic";
 import LabyrinthMoveCreator from "@/app/_components/Labyrinth/LabyrinthMoveCreator";
 import toast from "react-hot-toast";
 import SecondaryButton from "@/app/_components/buttons/SecondaryButton";
@@ -38,14 +43,38 @@ const botNames: string[] = [
   "Botastic",
 ];
 
+type BotType = components["schemas"]["PlayerPlaysGame"]["botType"];
+
+export function getBotName(playerID: string): string {
+  const generator = new RandomNumberGenerator(playerID);
+  const randomIndex = Math.floor(generator.rand() * botNames.length);
+  return botNames[randomIndex];
+}
+
+export function parseBotType(botType: BotType) {
+  switch (botType) {
+    case "weak_bot":
+      return "Weak bot";
+    case "medium_bot":
+      return "Medium bot";
+    case "strong_bot":
+      return "String bot";
+    default:
+      return "bot";
+  }
+}
+
 export function getPlayerNameElem(gamePlayer: GamePlayer) {
-  if (gamePlayer.botType === "player") {
-    return <span>{gamePlayer.user?.username}</span>;
+  if (gamePlayer.botType === null && gamePlayer.user !== null) {
+    return <span>{gamePlayer.user.username}</span>;
   } else {
     return (
       <span>
-        {botNames[gamePlayer.playerIndex]}
-        <span className="text-orange-400"> (Bot)</span>
+        {getBotName(gamePlayer.id)}
+        <span className="text-orange-400">
+          {" "}
+          ({parseBotType(gamePlayer.botType)})
+        </span>
       </span>
     );
   }
@@ -61,17 +90,65 @@ export default function LabyrinthGameUI({
   user,
   ownPlayerIndex,
 }: Props) {
-  const [dbGame, updateGame, allowChange, allowEdit] = useGame(
-    initialGame,
-    user
-  );
-
-  const [gamePlayers] = useEntity<GamePlayer>("game", "getPlayers", dbGame.id);
+  const [dbGame] = useGame(initialGame, user);
+  const game = Game.buildFromString(dbGame.gameState);
   const router = useRouter();
-  const gameState = Game.buildFromString(dbGame.gameState).gameState;
   if (!dbGame.started) {
     router.push(`/play/${dbGame.id}/lobby`);
   }
+  const [gamePlayers] = useEntity<GamePlayer>("game", "getPlayers", dbGame.id);
+  const [isHistory, setHistory] = useState(false);
+  const [displayGameStateStr, setDisplayGameStateStr] = useState<string>(
+    JSON.stringify(game.gameState)
+  );
+  const displayGameState = GameState.create(JSON.parse(displayGameStateStr));
+  const [displayMoveIndex, setDisplayMoveIndex] = useState(
+    game.gameState.historyMoves.length
+  );
+  const [displayPlayer, setDisplayPlayer] = useState<GamePlayer | null>(null);
+
+  if (dbGame.finished && !isHistory) {
+    console.log("finished");
+    setHistory(true);
+  }
+
+  // update the displayed game state based on the displayMoveIndex
+  useEffect(() => {
+    const undoMoves = game.gameState.historyMoves.length - displayMoveIndex;
+    let newDisplayGameState = game.gameState;
+    for (let i = 0; i < undoMoves; i++) {
+      newDisplayGameState = newDisplayGameState.undoMove().newGameState;
+    }
+    const testGame = Game.buildFromSetup();
+    setDisplayGameStateStr(JSON.stringify(newDisplayGameState));
+    setHistory(undoMoves !== 0);
+  }, [displayMoveIndex, game.gameState]);
+
+  // Stay at live version of game if not viewed as history
+  useEffect(() => {
+    setDisplayMoveIndex((oldVal) => {
+      if (oldVal === game.gameState.historyMoves.length - 1) {
+        return game.gameState.historyMoves.length;
+      } else {
+        return oldVal;
+      }
+    });
+  }, [game.gameState.historyMoves.length]);
+
+  const nextMove = () => {
+    if (displayMoveIndex >= game.gameState.historyMoves.length) {
+      return;
+    }
+    setDisplayMoveIndex(displayMoveIndex + 1);
+  };
+
+  const prevMove = () => {
+    if (displayMoveIndex === 0) {
+      return;
+    }
+    setDisplayMoveIndex(displayMoveIndex - 1);
+  };
+
   const onMove = async (move: Move) => {
     if (ownPlayerIndex === null) {
       return;
@@ -96,12 +173,12 @@ export default function LabyrinthGameUI({
       toast.error(res.error.message);
     }
   };
-
   let playerToMove: GamePlayer | null = null;
   let ownPlayer: GamePlayer | null = null;
   for (const gamePlayer of gamePlayers) {
     if (
-      gamePlayer.playerIndex === gameState.allPlayerStates.playerIndexToMove
+      gamePlayer.playerIndex ===
+      displayGameState.allPlayerStates.playerIndexToMove
     ) {
       playerToMove = gamePlayer;
     }
@@ -109,38 +186,62 @@ export default function LabyrinthGameUI({
       ownPlayer = gamePlayer;
     }
   }
+  if (displayPlayer === null && ownPlayer !== null) {
+    setDisplayPlayer(ownPlayer);
+  }
+  const playerClicked = (gamePlayer: GamePlayer) => {
+    setDisplayPlayer(gamePlayer);
+  };
   const myTurn = playerToMove?.userID === user.id;
   return (
-    <div>
-      <p>Players</p>
-      <GamePlayerArea
-        gamePlayers={gamePlayers}
-        playerToMove={gameState.allPlayerStates.playerIndexToMove}
-      />
-      <LabyrinthMoveCreator
-        onMove={onMove}
-        gameState={gameState}
-        ownPlayerIndex={ownPlayerIndex}
-      ></LabyrinthMoveCreator>
-      <div className="bg-slate-700 flex items-center p-1 justify-between mt-2">
-        <div className="flex gap-2">
-          <SecondaryButton>Prev</SecondaryButton>
-          <SecondaryButton>Next</SecondaryButton>
-          <span>{gameState.historyMoves.length} Moves</span>
-        </div>
-        <p className="text-xl">
-          {myTurn ? (
-            <>Its your turn</>
-          ) : (
-            <>{playerToMove && getPlayerNameElem(playerToMove)} is to move</>
-          )}
-        </p>
+    <div className="flex xl:flex-row flex-col justify-center xl:gap-2">
+      <div className="flex-grow-[4] bg-neutral-800 p-1 rounded-md">
+        <LabyrinthMoveCreator
+          onMove={onMove}
+          gameState={displayGameState}
+          ownPlayerIndex={isHistory ? null : ownPlayerIndex}
+        ></LabyrinthMoveCreator>
       </div>
-      {ownPlayer !== null ? (
-        <TreasuresArea gamePlayer={ownPlayer} gameState={gameState} />
-      ) : (
-        <></>
-      )}
+      <div className="flex-grow-[2]">
+        <div className="bg-slate-700 flex items-center gap-2 p-1 justify-start">
+          <div className="flex gap-2">
+            <SecondaryButton onClick={prevMove}>Prev</SecondaryButton>
+            <SecondaryButton onClick={nextMove}>Next</SecondaryButton>
+            {isHistory ? (
+              <p>
+                {displayGameState.historyMoves.length}/
+                {game.gameState.historyMoves.length} Moves
+              </p>
+            ) : (
+              <p>{game.gameState.historyMoves.length} Moves</p>
+            )}
+          </div>
+          <p className="text-xl">
+            {myTurn ? (
+              <>Its your turn</>
+            ) : (
+              <>{playerToMove && getPlayerNameElem(playerToMove)} is to move</>
+            )}
+          </p>
+        </div>
+        <div>
+          <GamePlayerArea
+            gamePlayers={gamePlayers}
+            playerToMove={displayGameState.allPlayerStates.playerIndexToMove}
+            playerClicked={playerClicked}
+          />
+        </div>
+        {displayPlayer !== null ? (
+          <div className="mb-10">
+            <TreasuresArea
+              gamePlayer={displayPlayer}
+              gameState={displayGameState}
+            />
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
     </div>
   );
 }
