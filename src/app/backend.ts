@@ -185,7 +185,7 @@ export interface components {
     };
     UpdateGameErrorResponse: {
       /** @enum {string} */
-      message: "game does not exist" | "invalid setup" | "no permission" | "game has already started";
+      message: "game does not exist" | "invalid setup" | "no permission" | "game has already started" | "cant reduce player count";
     };
     ShiftPositionDto: {
       /** @enum {number} */

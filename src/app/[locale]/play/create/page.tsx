@@ -6,6 +6,7 @@ import { client } from "@/app/clientAPI";
 import { Game } from "labyrinth-game-logic";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { generateRandomSeed } from "../[gameID]/lobby/GameSettings";
 
 interface VisibilityInterface {
   label: string;
@@ -40,10 +41,12 @@ export default function Page() {
     }
   };
   const create = async () => {
+    const gameSetup = Game.getDefaultSetup();
+    gameSetup.seed = generateRandomSeed();
     const response = await client.api.POST("/game", {
       body: {
         visibility: visibility.value,
-        gameSetup: Game.getDefaultSetup(),
+        gameSetup,
       },
     });
     if (response.error) {
@@ -55,7 +58,7 @@ export default function Page() {
   };
 
   return (
-    <div>
+    <div className="p-4">
       <div className="flex flex-col space-y-5 items-start">
         <h1 className="text-3xl text-center">Create game</h1>
         <div className="flex flex-col space-y-3 justify-start items-start">
@@ -77,11 +80,11 @@ export default function Page() {
         </div>
         <p>Game settings can be set later</p>
       </div>
-      <div className="flex flex-row justify-center mt-10">
-        <Labyrinth boardHeight={7} boardWidth={7} seed="sd"></Labyrinth>
-      </div>
-      <div className="flex flex-col items-end mt-5 p-2">
+      <div className="flex flex-col items-start mt-5 p-2">
         <PrimaryButton onClick={create}>Create game</PrimaryButton>
+      </div>
+      <div className="flex flex-row justify-center">
+        <Labyrinth boardHeight={7} boardWidth={7} seed="sd"></Labyrinth>
       </div>
     </div>
   );

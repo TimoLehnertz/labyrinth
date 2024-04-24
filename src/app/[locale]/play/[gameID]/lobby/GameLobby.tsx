@@ -116,7 +116,7 @@ export default function GameLobby({ game }: Props) {
           <GamePlayer gamePlayer={player} game={game} key={i}></GamePlayer>
         ))}
       </div>
-      <div className="mt-5 flex gap-2">
+      <div className="mt-5 flex gap-2 flex-col sm:flex-row">
         {isJoined ? (
           <PrimaryButton onClick={toggleReady}>
             {isReady ? "Ready" : "Not ready"}
@@ -127,7 +127,7 @@ export default function GameLobby({ game }: Props) {
         {isJoined && isHost && !isFull ? (
           <>
             <SecondaryButton
-              className="ml-4"
+              className="sm:ml-4"
               onClick={() => addBot("weak_bot")}
             >
               Add weak bot

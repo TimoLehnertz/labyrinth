@@ -14,23 +14,6 @@ export default function Labyrinth({
   boardWidth,
   boardHeight,
 }: LabyrinthProps) {
-  // useEffect(() => {
-  //   // Create a socket connection
-  //   const socket = io("http://localhost:3001", {
-  //     withCredentials: true,
-  //   });
-
-  //   // Listen for incoming messages
-  //   socket.on("message", (message) => {
-  //     console.log("received " + message);
-  //   });
-  //   socket.send("gameABC", "Hello world");
-  //   // Clean up the socket connection on unmount
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
-
   const game = Game.buildFromSetup({
     playerCount: 2,
     seed,

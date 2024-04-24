@@ -18,7 +18,7 @@ export default function GamePlayerArea({
   const user = client.useUser();
   gamePlayers = gamePlayers.sort((a, b) => a.playerIndex - b.playerIndex);
   return (
-    <div className="flex flex-wrap flex-row gap-4 p-4 bg-neutral-800">
+    <div className="flex flex-wrap flex-row gap-4 p-4">
       {gamePlayers.map((gamePlayer, key) => (
         <GamePlayerCircle
           key={key}

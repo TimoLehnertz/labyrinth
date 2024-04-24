@@ -6,6 +6,7 @@ import {
   BoardPosition,
   Game,
   GameState,
+  Heading,
   OpenSides,
   PathTile,
   TileType,
@@ -117,59 +118,61 @@ function buildPlayerIndicators(
     playerIndicators.push(
       <div
         key={i}
-        className="rounded-full w-4 h-4 border mr-[-0.1rem]"
+        className="rounded-full w-[30%] h-[30%] border mr-[-0.1rem] group-hover:translate-x-[100%] group-hover:translate-y-[100%] transition-all group-hover:opacity-75"
         style={{ backgroundColor: playerIndexToColor(playerIndex) }}
       ></div>
     );
     i++;
   }
   return (
-    <div className="absolute inset-0 flex justify-center items-center players">
+    <div className="absolute inset-0 flex justify-center items-center players group">
       {playerIndicators}
     </div>
   );
 }
 
-function buildOverlay(openSides: OpenSides) {
+function buildOverlay(headings: Heading[]) {
   const content = [];
-  if (openSides.northOpen) {
+  if (headings.includes(Heading.NORTH)) {
     content.push(
       <div
         key={"north"}
-        className="absolute top-0 right-[33%] bottom-[66%] left-[33%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+        className="absolute top-0 right-[33%] bottom-[66%] left-[33%] bg-gray-700 opacity-45 group-hover/tile:opacity-100"
       ></div>
     );
   }
-  if (openSides.eastOpen) {
+  if (headings.includes(Heading.EAST)) {
     content.push(
       <div
         key={"east"}
-        className="absolute top-[33%] right-0 bottom-[33%] left-[66%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+        className="absolute top-[33%] right-0 bottom-[33%] left-[66%] bg-gray-700 opacity-45 group-hover/tile:opacity-100"
       ></div>
     );
   }
-  if (openSides.southOpen) {
+  if (headings.includes(Heading.SOUTH)) {
     content.push(
       <div
         key={"south"}
-        className="absolute top-[66%] right-[33%] bottom-0 left-[33%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+        className="absolute top-[66%] right-[33%] bottom-0 left-[33%] bg-gray-700 opacity-45 group-hover/tile:opacity-100"
       ></div>
     );
   }
-  if (openSides.westOpen) {
+  if (headings.includes(Heading.WEST)) {
     content.push(
       <div
         key={"west"}
-        className="absolute top-[33%] right-[66%] bottom-[33%] left-0 bg-gray-700 opacity-30 group-hover/tile:opacity-100"
+        className="absolute top-[33%] right-[66%] bottom-[33%] left-0 bg-gray-700 opacity-45 group-hover/tile:opacity-100"
       ></div>
     );
   }
-  content.push(
-    <div
-      key={"center"}
-      className="absolute top-[33%] right-[33%] bottom-[33%] left-[33%] bg-gray-700 opacity-30 group-hover/tile:opacity-100"
-    ></div>
-  );
+  if (headings.length > 0) {
+    content.push(
+      <div
+        key={"center"}
+        className="absolute top-[33%] right-[33%] bottom-[33%] left-[33%] bg-gray-700 opacity-45 group-hover/tile:opacity-100"
+      ></div>
+    );
+  }
   return <div className="absolute inset-0">{content}</div>;
 }
 
@@ -181,6 +184,7 @@ export interface Props {
   rotation?: number;
   onClick?: (position: BoardPosition) => void;
   displayDot?: boolean;
+  highlightHeadings?: Heading[];
 }
 export default function PathTileElem({
   gameState,
@@ -189,6 +193,7 @@ export default function PathTileElem({
   ownPlayerIndex,
   displayDot,
   onClick,
+  highlightHeadings,
 }: Props) {
   let pathTile;
   if (x === undefined || y === undefined) {
@@ -215,8 +220,8 @@ export default function PathTileElem({
     const backgroundColor = playerIndexToColor(pathTile.homeOfPlayerIndex);
     homePosition = (
       <div
-        className="absolute inset-0 scale-[40%] rounded-full border-solid border-2 border-gray-900"
-        style={{ backgroundColor, filter: "opacity(0.8)" }}
+        className="absolute inset-0 scale-[40%] rounded-full border-solid border-4 border-gray-900"
+        style={{ backgroundColor, filter: "opacity(0.6)" }}
       ></div>
     );
   }
@@ -237,7 +242,8 @@ export default function PathTileElem({
         width={200}
         height={200}
       ></Image>
-      {displayDot && buildOverlay(pathTile.openSides)}
+      {displayDot && buildOverlay(pathTile.openSides.headings)}
+      {highlightHeadings && buildOverlay(highlightHeadings)}
       {/* {displayDot && (
         <div className="absolute inset-0 rounded-full bg-slate-700 scale-[45%] opacity-70"></div>
       )} */}

@@ -16,9 +16,12 @@ export default async function page() {
   }
   return (
     <div>
-      <h1 className="text-3xl text-center">Games to join</h1>
+      <h1 className="text-3xl text-center mt-4">Games to join</h1>
       <div className="flex justify-center mt-10">
         <div className="flex flex-row space-x-5">
+          {res.data.length === 0 && (
+            <p>There are currently no games available to join :/</p>
+          )}
           {res.data.map((e, i) => (
             <PrimaryButton key={"btn" + i}>
               <Link key={i} href={`/play/${e.id}/lobby`}>
@@ -28,7 +31,7 @@ export default async function page() {
           ))}
         </div>
       </div>
-      <div className="flex flex-row justify-center mt-10">
+      <div className="flex flex-row justify-center mt-5">
         <Labyrinth boardHeight={7} boardWidth={7} seed="ds"></Labyrinth>
       </div>
     </div>

@@ -10,7 +10,7 @@ export default async function Page() {
     redirect("/");
   }
   return (
-    <div>
+    <div className="p-4">
       <div>
         <AddFriendsForm />
         {/* <Chat></Chat> */}

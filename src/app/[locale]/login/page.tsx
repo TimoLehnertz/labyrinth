@@ -7,7 +7,7 @@ export default async function LoginPage() {
     redirect("/");
   }
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center pt-5">
       <div className="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-5 shadow-md">
         <h1 className="mb-4 text-lg text-center">Register a new account</h1>
         <Form />

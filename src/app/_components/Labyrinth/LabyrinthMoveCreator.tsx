@@ -5,6 +5,7 @@ import {
   GameState,
   Heading,
   Move,
+  Path,
   PathTile,
   printBoard,
   ShiftPosition,
@@ -98,7 +99,8 @@ export function getTile(
   ownPlayerIndex: number | null,
   key: string,
   clickablePositions: BoardPosition[],
-  tileClicked: (position: BoardPosition) => void
+  tileClicked: (position: BoardPosition) => void,
+  highlightHeadings?: Heading[]
 ) {
   const width = gameState.board.width;
   const height = gameState.board.height;
@@ -119,6 +121,7 @@ export function getTile(
         ownPlayerIndex={ownPlayerIndex}
         displayDot={isClickable}
         onClick={isClickable ? tileClicked : undefined}
+        highlightHeadings={highlightHeadings}
       />
     );
   }
@@ -148,11 +151,13 @@ interface Props {
   gameState: GameState;
   onMove: (move: Move) => void;
   ownPlayerIndex: number | null;
+  displayPath: Path | null;
 }
 export default function LabyrinthMoveCreator({
   gameState,
   onMove,
   ownPlayerIndex,
+  displayPath,
 }: Props) {
   const [displayPositions, setDisplayPositions] = useState(false);
   const [alteredGameState, setAlteredGameState] =
@@ -161,6 +166,10 @@ export default function LabyrinthMoveCreator({
     gameState.board.shiftPosition
   );
   const [rotateBeforeShift, setRotateBeforeShift] = useState<number>(0);
+
+  if (displayPositions) {
+    displayPath = null;
+  }
 
   useEffect(() => {
     setDisplayPositions(false);
@@ -226,6 +235,10 @@ export default function LabyrinthMoveCreator({
   const cards = [];
   for (let y = 0; y < gameState.board.height + 2; y++) {
     for (let x = 0; x < gameState.board.width + 2; x++) {
+      let headings: Heading[] = [];
+      if (displayPath !== null) {
+        headings = displayPath.getHeadings(new BoardPosition(x - 1, y - 1));
+      }
       cards.push(
         getTile(
           x,
@@ -236,7 +249,8 @@ export default function LabyrinthMoveCreator({
           ownPlayerIndex,
           `${Math.random()}`,
           clickablePositions,
-          tileClicked
+          tileClicked,
+          headings
         )
       );
     }
@@ -245,7 +259,7 @@ export default function LabyrinthMoveCreator({
   return (
     <div>
       <div
-        className="grid gap-[0.1rem] max-w-[50rem] flex-grow"
+        className="grid gap-[0.1rem] flex-grow"
         style={{
           gridTemplateColumns: `repeat(${gameState.board.width + 2}, minmax(0, 1fr))`,
         }}

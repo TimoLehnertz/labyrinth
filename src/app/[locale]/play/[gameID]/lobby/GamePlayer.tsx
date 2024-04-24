@@ -77,9 +77,9 @@ export default function GamePlayer({ gamePlayer, game }: Props) {
   return (
     <div className="flex flex-row gap-2">
       <div
-        className="bg-gray-600 rounded-md p-1 pl-2 pr-2"
+        className="bg-gray-600 rounded-md p-0 pl-2 pr-2 border-4"
         style={{
-          backgroundColor: playerIndexToColor(gamePlayer.playerIndex),
+          borderColor: playerIndexToColor(gamePlayer.playerIndex),
           opacity: 0.8,
         }}
       >

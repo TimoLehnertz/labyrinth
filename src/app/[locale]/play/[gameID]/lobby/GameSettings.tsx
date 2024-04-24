@@ -17,15 +17,13 @@ type DbGame = components["schemas"]["Game"];
 
 export function useGame(
   initialGame: DbGame,
-  user: User
+  user: User | null
 ): [DbGame, (game: DbGame) => void, boolean, boolean] {
   const [game, setGame] = useState<DbGame>(initialGame);
   const [allowChange, setAllowChange] = useState<boolean>(true);
   const [allowEdit, setAllowEdit] = useState<boolean>(
-    user.id === game.ownerUserID
-    // true
+    user !== null && user.id === game.ownerUserID
   );
-  // console.log(client.useUser()?.id === game.ownerUserID);
   const updateGame = (game: DbGame) => {
     if (!allowEdit || !allowChange) {
       return;
@@ -55,7 +53,7 @@ export function useGame(
     // console.log("game updated", data);
     // console.log("me", user);
     // console.log("I can edit", user.id === data.ownerUserID);
-    setAllowEdit(user.id === data.ownerUserID);
+    setAllowEdit(user !== null && user.id === data.ownerUserID);
     setGame(data);
   };
 
@@ -93,7 +91,7 @@ function getSizeOptions(selectedValue: number) {
   });
 }
 
-function generateRandomSeed() {
+export function generateRandomSeed() {
   const animal1Index = Math.floor(Math.random() * 0.999 * animalNames.length);
   const activityIndex = Math.floor(Math.random() * 0.999 * activities.length);
   const animal2Index = Math.floor(Math.random() * 0.999 * animalNames.length);
@@ -110,15 +108,6 @@ export default function GameSettings({ initialGame, user }: Props) {
     user
   );
   const router = useRouter();
-
-  // console.log("edit: ", allowEdit);
-  // useEffect(() => {
-  //   const newGameSetup = { ...game };
-  //   const setup = JSON.parse(newGameSetup.gameSetup);
-  //   setup.seed = generateRandomSeed();
-  //   newGameSetup.gameSetup = JSON.stringify(setup);
-  //   setGameSetup(newGameSetup);
-  // }, [game]);
 
   useEffect(() => {
     if (game.started) {
@@ -186,96 +175,98 @@ export default function GameSettings({ initialGame, user }: Props) {
   return (
     <div>
       <GameLobby game={game}></GameLobby>
-      <details>
-        <summary>Advanced game settings</summary>
-        <br />
-        <CardRatiosSettings
-          readonly={allowEdit}
-          value={gameSetup.cardsRatio}
-          onChange={cardRatiosChanged}
-        />
-        <br />
-        <TreasureDistributionSettings
-          readonly={allowEdit}
-          value={gameSetup.treasureCardChances}
-          onChange={treasureDistributionChanged}
-        />
-      </details>
-      <br />
-      <p className="text-xl text-center">Map editor</p>
-      <br />
-      <div className="flex flex-row space-x-10 justify-center">
-        {allowEdit ? (
-          <div className="flex flex-col space-y-2">
-            <div>
-              <label htmlFor="width" className="mr-2">
-                Width
-              </label>
-              <select
-                name="width"
-                id="width"
-                onChange={widthChanged}
-                className="text-black"
-                // value={JSON.parse(game.gameSetup).boardWidth}
-              >
-                {getSizeOptions(gameSetup.boardWidth)}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="height" className="mr-2">
-                height
-              </label>
-              <select
-                name="height"
-                id="height"
-                onChange={heightChanged}
-                className="text-black"
-                // value={JSON.parse(game.gameSetup).boardWidth}
-              >
-                {getSizeOptions(gameSetup.boardHeight)}
-              </select>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div>Boardwidth: {gameSetup.boardWidth}</div>
-            <div>boardheight: {gameSetup.boardHeight}</div>
-            <div>{"=>"}</div>
-          </>
-        )}
-
-        <div>{gameSetup.playerCount} Maximum Players</div>
-      </div>
-      <br />
-      <div className="flex flex-col gap-2">
-        <label htmlFor="seed" className="text-xl text-center">
-          Seed
-        </label>
-        {allowEdit ? (
-          <input
-            type="text"
-            className="w-72 bg-gray-800 text-white p-2 rounded"
-            value={gameSetup.seed}
-            onChange={seedChanged}
+      <div className="p-4">
+        <details>
+          <summary>Advanced game settings</summary>
+          <br />
+          <CardRatiosSettings
+            readonly={allowEdit}
+            value={gameSetup.cardsRatio}
+            onChange={cardRatiosChanged}
           />
-        ) : (
-          <p>{gameSetup.seed}</p>
-        )}
+          <br />
+          <TreasureDistributionSettings
+            readonly={allowEdit}
+            value={gameSetup.treasureCardChances}
+            onChange={treasureDistributionChanged}
+          />
+        </details>
+        <br />
+        <p className="text-xl text-center">Map editor</p>
+        <br />
+        <div className="flex flex-row space-x-10 justify-center">
+          {allowEdit ? (
+            <div className="flex flex-col space-y-2">
+              <div>
+                <label htmlFor="width" className="mr-2">
+                  Width
+                </label>
+                <select
+                  name="width"
+                  id="width"
+                  onChange={widthChanged}
+                  className="text-black"
+                  value={JSON.parse(game.gameSetup).boardWidth}
+                >
+                  {getSizeOptions(gameSetup.boardWidth)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="height" className="mr-2">
+                  height
+                </label>
+                <select
+                  name="height"
+                  id="height"
+                  onChange={heightChanged}
+                  className="text-black"
+                  value={JSON.parse(game.gameSetup).boardHeight}
+                >
+                  {getSizeOptions(gameSetup.boardHeight)}
+                </select>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>Boardwidth: {gameSetup.boardWidth}</div>
+              <div>boardheight: {gameSetup.boardHeight}</div>
+              <div>{"=>"}</div>
+            </>
+          )}
 
-        {allowEdit ? (
-          <PrimaryButton type="button" onClick={regenerateSeed}>
-            Regenerate
-          </PrimaryButton>
-        ) : (
-          <></>
-        )}
-      </div>
-      <div className="flex flex-row justify-center mt-10">
-        <Labyrinth
-          seed={JSON.parse(game.gameSetup).seed}
-          boardWidth={JSON.parse(game.gameSetup).boardWidth}
-          boardHeight={JSON.parse(game.gameSetup).boardHeight}
-        ></Labyrinth>
+          <div>{gameSetup.playerCount} Maximum Players</div>
+        </div>
+        <br />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="seed" className="text-xl text-center">
+            Seed
+          </label>
+          {allowEdit ? (
+            <input
+              type="text"
+              className="w-72 bg-gray-800 text-white p-2 rounded"
+              value={gameSetup.seed}
+              onChange={seedChanged}
+            />
+          ) : (
+            <p>{gameSetup.seed}</p>
+          )}
+
+          {allowEdit ? (
+            <PrimaryButton type="button" onClick={regenerateSeed}>
+              Regenerate
+            </PrimaryButton>
+          ) : (
+            <></>
+          )}
+        </div>
+        <div className="flex flex-row justify-center mt-10">
+          <Labyrinth
+            seed={JSON.parse(game.gameSetup).seed}
+            boardWidth={JSON.parse(game.gameSetup).boardWidth}
+            boardHeight={JSON.parse(game.gameSetup).boardHeight}
+          ></Labyrinth>
+        </div>
       </div>
     </div>
   );
