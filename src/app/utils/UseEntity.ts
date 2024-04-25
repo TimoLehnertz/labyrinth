@@ -10,14 +10,17 @@ export function useEntity<T>(
 ): [T[], Dispatch<SetStateAction<T[]>>] {
   const [entities, setEntities] = useState<T[]>([]);
   useEffect(() => {
-    const sendRequestsSocket = io(`http://localhost:3001/${namespace}`, {
-      withCredentials: true,
-      transports: ["websocket"],
-      auth: { Bearer: client.getToken() },
-      extraHeaders: {
-        Bearer: client.getToken(),
-      },
-    });
+    const sendRequestsSocket = io(
+      `${process.env.NEXT_PUBLIC_BACKEND}/${namespace}`,
+      {
+        withCredentials: true,
+        transports: ["websocket"],
+        auth: { Bearer: client.getToken() },
+        extraHeaders: {
+          Bearer: client.getToken(),
+        },
+      }
+    );
     sendRequestsSocket.auth = {
       Bearer: client.getToken(),
     };

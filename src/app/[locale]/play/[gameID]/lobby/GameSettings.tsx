@@ -58,7 +58,7 @@ export function useGame(
   };
 
   useEffect(() => {
-    const socket = io(`http://localhost:3001/game`, {
+    const socket = io(`${process.env.NEXT_PUBLIC_BACKEND}/game`, {
       withCredentials: true,
       transports: ["websocket"],
       auth: { Bearer: client.getToken() },
