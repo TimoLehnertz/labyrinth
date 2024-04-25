@@ -50,9 +50,6 @@ export function useGame(
       });
   };
   const update = (data: any) => {
-    // console.log("game updated", data);
-    // console.log("me", user);
-    // console.log("I can edit", user.id === data.ownerUserID);
     setAllowEdit(user !== null && user.id === data.ownerUserID);
     setGame(data);
   };
