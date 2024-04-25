@@ -4,8 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { server } from "../serverAPI";
 import { components } from "../backend";
-import SecondaryButton from "../_components/buttons/SecondaryButton";
-import SideBar from "../_components/SideBar";
+import SideBar from "../_components/sideBar";
 import Image from "next/image";
 import PrimaryButton from "../_components/buttons/PrimaryButton";
 
