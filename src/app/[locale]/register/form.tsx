@@ -4,7 +4,6 @@ import { FormEvent, useState } from "react";
 import { SubmitButton } from "../../_components/submit-button";
 import toast from "react-hot-toast";
 import { z, ZodError } from "zod";
-import { register } from "@/_lib/apiInterface";
 import BlockInput from "@/app/_components/blockInput";
 import { useRouter } from "next/navigation";
 import { client } from "../../clientAPI";
