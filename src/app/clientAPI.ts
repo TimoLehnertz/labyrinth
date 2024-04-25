@@ -70,8 +70,8 @@ export const client = {
     return false;
   },
   api: createClient<paths>({
-    baseUrl: "http://localhost:3001",
-    // baseUrl: process.env.BACKEND,
+    // baseUrl: "http://localhost:3001",
+    baseUrl: process.env.NEXT_PUBLIC_BACKEND,
 
     fetch: (url, options) => {
       const token = localStorage.getItem("jwt");
