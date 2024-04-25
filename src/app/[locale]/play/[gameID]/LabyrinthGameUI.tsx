@@ -252,7 +252,15 @@ export default function LabyrinthGameUI({
             </b>
           </div>
           {isEndScreen ? (
-            <GameResults gamePlayers={gamePlayers} gameState={game.gameState} />
+            gamePlayers.length ===
+            game.gameState.allPlayerStates.playerCount ? (
+              <GameResults
+                gamePlayers={gamePlayers}
+                gameState={game.gameState}
+              />
+            ) : (
+              <p>Results are loading...</p>
+            )
           ) : (
             <>
               <div className="max-w-[25rem]">
