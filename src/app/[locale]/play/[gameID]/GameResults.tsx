@@ -56,9 +56,7 @@ interface Props {
   gamePlayers: GamePlayer[];
 }
 export default function GameResults({ gameState, gamePlayers }: Props) {
-  console.log(gamePlayers);
   const results = generateResults(gameState, gamePlayers);
-  console.log(results);
   const winner = results[0];
   return (
     <div className="p-4">

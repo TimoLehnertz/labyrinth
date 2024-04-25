@@ -1,7 +1,7 @@
 "use client";
 import { components } from "@/app/backend";
 import { client, User } from "@/app/clientAPI";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGame } from "./lobby/GameSettings";
 import { useRouter } from "next/navigation";
 import { useEntity } from "@/app/utils/UseEntity";
@@ -18,7 +18,6 @@ import toast from "react-hot-toast";
 import SecondaryButton from "@/app/_components/buttons/SecondaryButton";
 import TreasuresArea from "./TreasuresArea";
 import GameResults from "./GameResults";
-import { CgEnter } from "react-icons/cg";
 
 type GamePlayer = components["schemas"]["PlayerPlaysGame"];
 type DbGame = components["schemas"]["Game"];
