@@ -154,6 +154,7 @@ export interface components {
       /** @enum {string} */
       visibility: "public" | "friends" | "private";
       gameSetup: components["schemas"]["GameSetupDto"];
+      displayPaths: boolean;
     };
     CreateGameResponse: {
       gameID: string;
@@ -174,12 +175,14 @@ export interface components {
       ownerUser: components["schemas"]["User"];
       finished: boolean;
       started: boolean;
+      displayPaths: boolean;
     };
     GetErrorResponse: Record<string, never>;
     UpdateGameDto: {
       /** @enum {string} */
       visibility: "public" | "friends" | "private";
       gameSetup: components["schemas"]["GameSetupDto"];
+      displayPaths: boolean;
       id: string;
       ownerID?: string;
     };

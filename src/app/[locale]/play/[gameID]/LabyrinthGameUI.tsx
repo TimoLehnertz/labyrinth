@@ -220,6 +220,7 @@ export default function LabyrinthGameUI({
             gameState={displayGameState}
             ownPlayerIndex={isHistory ? null : ownPlayerIndex}
             displayPath={lastMovePath}
+            easyMode={dbGame.displayPaths}
           ></LabyrinthMoveCreator>
         </div>
         <div className="self-stretch">

@@ -47,6 +47,7 @@ export default function Page() {
       body: {
         visibility: visibility.value,
         gameSetup,
+        displayPaths: true,
       },
     });
     if (response.error) {

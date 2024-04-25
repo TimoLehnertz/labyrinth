@@ -119,7 +119,7 @@ export default function GameLobby({ game }: Props) {
       <div className="mt-5 flex gap-2 flex-col sm:flex-row">
         {isJoined ? (
           <PrimaryButton onClick={toggleReady}>
-            {isReady ? "Ready" : "Not ready"}
+            {isReady ? "Make not ready" : "Make ready"}
           </PrimaryButton>
         ) : (
           <></>

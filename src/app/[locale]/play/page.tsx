@@ -20,6 +20,7 @@ export default function Page() {
       body: {
         gameSetup,
         visibility: "private",
+        displayPaths: true,
       },
     });
     if (res.error) {
@@ -37,7 +38,7 @@ export default function Page() {
           <PrimaryButton onClick={startAIGame}>Challenge the AI</PrimaryButton>
         </div>
       </div>
-      <div className="flex flex-row justify-center">
+      <div className="flex flex-row justify-center mt-10">
         <Labyrinth boardHeight={7} boardWidth={7} seed="seed"></Labyrinth>
       </div>
     </div>

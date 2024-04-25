@@ -26,24 +26,24 @@ export function useEntity<T>(
     };
     sendRequestsSocket.emit(property, data);
     sendRequestsSocket.on("init", (data) => {
-      console.log(`init of ${namespace}/${property}: `, data);
+      // console.log(`init of ${namespace}/${property}: `, data);
       setEntities(data);
       onchange?.();
     });
     sendRequestsSocket.on("add", (data) => {
-      console.log(`added ${namespace}/${property}: `, data);
+      // console.log(`added ${namespace}/${property}: `, data);
       setEntities((prevEntities) => prevEntities.concat([data]));
       onchange?.();
     });
     sendRequestsSocket.on("remove", (removal) => {
-      console.log(`removed ${namespace}/${property}: `, removal);
+      // console.log(`removed ${namespace}/${property}: `, removal);
       setEntities((prevEntities) =>
         prevEntities.filter((entity) => (entity as any).id !== removal.id)
       );
       onchange?.();
     });
     sendRequestsSocket.on("update", (update) => {
-      console.log(`updated ${namespace}/${property}: `, update);
+      // console.log(`updated ${namespace}/${property}: `, update);
       setEntities((prevEntities) => {
         const newEntities = [];
         for (const prevEntity of prevEntities) {

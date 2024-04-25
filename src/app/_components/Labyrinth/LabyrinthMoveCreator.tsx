@@ -70,7 +70,7 @@ function getEmptyEdgeTile(key: string) {
 function getShiftPositionTile(
   shiftPosition: ShiftPosition,
   currentShiftPosition: ShiftPosition | null,
-  setShiftPosition: (shiftPosition: ShiftPosition) => void,
+  setShiftPosition: ((shiftPosition: ShiftPosition) => void) | undefined,
   gameState: GameState,
   ownPlayerIndex: number | null,
   key: string
@@ -81,7 +81,7 @@ function getShiftPositionTile(
     <div
       key={key}
       className="aspect-square relative bg-gray-500 rounded-xl hover:bg-gray-600"
-      onClick={() => shiftPosition && setShiftPosition(shiftPosition)}
+      onClick={() => shiftPosition && setShiftPosition?.(shiftPosition)}
     >
       {isHere && (
         <PathTileElem gameState={gameState} ownPlayerIndex={ownPlayerIndex} />
@@ -100,7 +100,8 @@ export function getTile(
   key: string,
   clickablePositions: BoardPosition[],
   tileClicked: (position: BoardPosition) => void,
-  highlightHeadings?: Heading[]
+  highlightHeadings?: Heading[],
+  easyMode?: boolean
 ) {
   const width = gameState.board.width;
   const height = gameState.board.height;
@@ -119,20 +120,17 @@ export function getTile(
         x={x - 1}
         y={y - 1}
         ownPlayerIndex={ownPlayerIndex}
-        displayDot={isClickable}
+        displayDot={easyMode && isClickable}
         onClick={isClickable ? tileClicked : undefined}
         highlightHeadings={highlightHeadings}
       />
     );
   }
-  if (
-    isCorner(x, y, width, height) ||
-    ownPlayerIndex !== gameState.allPlayerStates.playerIndexToMove
-  ) {
-    return getEmptyEdgeTile(key);
-  }
   const heading = headingByCoordinate(x, y, width, height);
   const offset = offsetByCoordinate(x, y, heading);
+  if (isCorner(x, y, width, height)) {
+    return getEmptyEdgeTile(key);
+  }
   if (offset % 2 === 0) {
     return getEmptyEdgeTile(key);
   }
@@ -140,7 +138,9 @@ export function getTile(
   return getShiftPositionTile(
     new ShiftPosition(heading, index),
     shiftPosition,
-    setShiftPosition,
+    ownPlayerIndex === gameState.allPlayerStates.playerIndexToMove
+      ? setShiftPosition
+      : undefined,
     gameState,
     ownPlayerIndex,
     key
@@ -152,12 +152,14 @@ interface Props {
   onMove: (move: Move) => void;
   ownPlayerIndex: number | null;
   displayPath: Path | null;
+  easyMode: boolean;
 }
 export default function LabyrinthMoveCreator({
   gameState,
   onMove,
   ownPlayerIndex,
   displayPath,
+  easyMode,
 }: Props) {
   const [displayPositions, setDisplayPositions] = useState(false);
   const [alteredGameState, setAlteredGameState] =
@@ -250,7 +252,8 @@ export default function LabyrinthMoveCreator({
           `${Math.random()}`,
           clickablePositions,
           tileClicked,
-          headings
+          headings,
+          easyMode
         )
       );
     }

@@ -36,6 +36,7 @@ export function useGame(
           visibility: game.visibility,
           gameSetup: JSON.parse(game.gameSetup),
           ownerID: game.ownerUserID,
+          displayPaths: game.displayPaths,
         },
       })
       .then((res) => {
@@ -100,10 +101,7 @@ interface Props {
   user: User;
 }
 export default function GameSettings({ initialGame, user }: Props) {
-  const [game, setGameSetup, allowChange, allowEdit] = useGame(
-    initialGame,
-    user
-  );
+  const [game, setGame, allowChange, allowEdit] = useGame(initialGame, user);
   const router = useRouter();
 
   useEffect(() => {
@@ -117,7 +115,7 @@ export default function GameSettings({ initialGame, user }: Props) {
     const setup = JSON.parse(newGameSetup.gameSetup);
     setup.cardsRatio = cardRatios;
     newGameSetup.gameSetup = JSON.stringify(setup);
-    setGameSetup(newGameSetup);
+    setGame(newGameSetup);
   };
   const treasureDistributionChanged = (
     treasureCardChances: TreasureCardChances
@@ -126,7 +124,7 @@ export default function GameSettings({ initialGame, user }: Props) {
     const setup = JSON.parse(newGameSetup.gameSetup);
     setup.treasureCardChances = treasureCardChances;
     newGameSetup.gameSetup = JSON.stringify(setup);
-    setGameSetup(newGameSetup);
+    setGame(newGameSetup);
   };
 
   const widthChanged = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -138,7 +136,7 @@ export default function GameSettings({ initialGame, user }: Props) {
       setup.boardHeight
     );
     newGameSetup.gameSetup = JSON.stringify(setup);
-    setGameSetup(newGameSetup);
+    setGame(newGameSetup);
   };
 
   const heightChanged = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -150,7 +148,7 @@ export default function GameSettings({ initialGame, user }: Props) {
       setup.boardHeight
     );
     newGameSetup.gameSetup = JSON.stringify(setup);
-    setGameSetup(newGameSetup);
+    setGame(newGameSetup);
   };
 
   const regenerateSeed = () => {
@@ -158,7 +156,7 @@ export default function GameSettings({ initialGame, user }: Props) {
     const setup = JSON.parse(newGameSetup.gameSetup);
     setup.seed = generateRandomSeed();
     newGameSetup.gameSetup = JSON.stringify(setup);
-    setGameSetup(newGameSetup);
+    setGame(newGameSetup);
   };
 
   const seedChanged = (event: ChangeEvent<HTMLInputElement>) => {
@@ -166,7 +164,13 @@ export default function GameSettings({ initialGame, user }: Props) {
     const setup = JSON.parse(newGameSetup.gameSetup);
     setup.seed = event.target.value;
     newGameSetup.gameSetup = JSON.stringify(setup);
-    setGameSetup(newGameSetup);
+    setGame(newGameSetup);
+  };
+
+  const updateDisplayPaths = (event: ChangeEvent<HTMLInputElement>) => {
+    const newGameSetup = { ...game };
+    newGameSetup.displayPaths = !newGameSetup.displayPaths;
+    setGame(newGameSetup);
   };
   const gameSetup = JSON.parse(game.gameSetup);
   return (
@@ -188,6 +192,18 @@ export default function GameSettings({ initialGame, user }: Props) {
             onChange={treasureDistributionChanged}
           />
         </details>
+        <br />
+        <div className="flex gap-2">
+          <input
+            type="checkbox"
+            id="displayPaths"
+            checked={game.displayPaths}
+            onChange={updateDisplayPaths}
+          />
+          <label htmlFor="displayPaths">
+            Beginner mode (Helps by displaying possible moves)
+          </label>
+        </div>
         <br />
         <p className="text-xl text-center">Map editor</p>
         <br />

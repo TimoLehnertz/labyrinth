@@ -1,7 +1,7 @@
 import { components } from "@/app/backend";
 import { AllPlayerStates, GameState } from "labyrinth-game-logic";
 import React from "react";
-import { getBotName } from "./LabyrinthGameUI";
+import { getBotName, parseBotType } from "./LabyrinthGameUI";
 
 type GamePlayer = components["schemas"]["PlayerPlaysGame"];
 type BotType = components["schemas"]["PlayerPlaysGame"]["botType"];
@@ -66,7 +66,8 @@ export default function GameResults({ gameState, gamePlayers }: Props) {
       <p className="text-center">
         <b className="text-xl text-amber-400">
           {winner?.gamePlayer.user?.username ??
-            getBotName(winner?.gamePlayer.id ?? "")}
+            getBotName(winner?.gamePlayer.id ?? "") +
+              ` (${parseBotType(winner.gamePlayer.botType)})`}
         </b>{" "}
         <span>Won the game!</span>
       </p>
@@ -91,7 +92,8 @@ export default function GameResults({ gameState, gamePlayers }: Props) {
                   }
                 >
                   {result.gamePlayer.user?.username ??
-                    getBotName(result.gamePlayer.id ?? "")}
+                    getBotName(result.gamePlayer.id ?? "") +
+                      ` (${parseBotType(result.gamePlayer.botType)})`}
                 </div>
               </div>
               <div className="text-right">
