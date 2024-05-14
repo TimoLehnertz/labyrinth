@@ -223,6 +223,7 @@ export interface components {
       ready: boolean;
       isWinner: boolean;
       gameFinished: boolean;
+      playerName: string | null;
     };
     JoinErrorResponse: {
       /** @enum {string} */
@@ -519,6 +520,7 @@ export interface operations {
     parameters: {
       query: {
         gameID: string;
+        playerName?: string;
       };
     };
     responses: {

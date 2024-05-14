@@ -68,7 +68,7 @@ export function parseBotType(botType: BotType) {
 
 export function getPlayerNameElem(gamePlayer: GamePlayer) {
   if (gamePlayer.botType === null && gamePlayer.user !== null) {
-    return <span>{gamePlayer.user.username}</span>;
+    return <span>{gamePlayer.playerName ?? gamePlayer.user.username}</span>;
   } else {
     return (
       <span>
@@ -85,13 +85,8 @@ export function getPlayerNameElem(gamePlayer: GamePlayer) {
 interface Props {
   initialGame: DbGame;
   user: User | null;
-  ownPlayerIndex: number | null;
 }
-export default function LabyrinthGameUI({
-  initialGame,
-  user,
-  ownPlayerIndex,
-}: Props) {
+export default function LabyrinthGameUI({ initialGame, user }: Props) {
   const [dbGame] = useGame(initialGame, user);
   const game = Game.buildFromString(dbGame.gameState);
   const router = useRouter();
@@ -139,6 +134,17 @@ export default function LabyrinthGameUI({
     });
   }, [game.gameState.historyMoves.length]);
 
+  // find own playerIndex
+  let ownPlayerIndices = null;
+  if (user) {
+    ownPlayerIndices = [];
+    for (const gamePlayer of gamePlayers) {
+      if (gamePlayer.userID === user.id) {
+        ownPlayerIndices.push(gamePlayer.playerIndex);
+      }
+    }
+  }
+
   const nextMove = () => {
     if (displayMoveIndex >= game.gameState.historyMoves.length) {
       return;
@@ -154,7 +160,7 @@ export default function LabyrinthGameUI({
   };
 
   const onMove = async (move: Move) => {
-    if (ownPlayerIndex === null) {
+    if (ownPlayerIndices === null) {
       return;
     }
     const res = await client.api.POST("/game/move", {
@@ -169,7 +175,7 @@ export default function LabyrinthGameUI({
         to: move.to,
         fromShiftPosition: move.fromShiftPosition,
         toShiftPosition: move.toShiftPosition,
-        playerIndex: ownPlayerIndex,
+        playerIndex: game.gameState.allPlayerStates.playerIndexToMove,
         rotateBeforeShift: move.rotateBeforeShift,
       },
     });
@@ -186,10 +192,21 @@ export default function LabyrinthGameUI({
     ) {
       playerToMove = gamePlayer;
     }
-    if (user !== null && gamePlayer.userID === user.id) {
+    if (
+      user !== null &&
+      gamePlayer.userID === user.id &&
+      gamePlayer.playerName === null
+    ) {
       ownPlayer = gamePlayer;
     }
   }
+
+  useEffect(() => {
+    if (playerToMove?.userID === user?.id) {
+      setDisplayPlayer(playerToMove);
+    }
+  }, [dbGame, playerToMove, user?.id]);
+
   if (displayPlayer === null) {
     if (ownPlayer !== null) {
       setDisplayPlayer(ownPlayer);
@@ -210,6 +227,16 @@ export default function LabyrinthGameUI({
       lastMove.to
     );
   }
+  let ownPlayerIndex = null;
+  if (!isHistory) {
+    if (
+      ownPlayerIndices?.includes(
+        game.gameState.allPlayerStates.playerIndexToMove
+      )
+    ) {
+      ownPlayerIndex = game.gameState.allPlayerStates.playerIndexToMove;
+    }
+  }
   return (
     <div className="flex justify-center">
       <div className="flex xl:flex-row flex-col justify-center xl:gap-2 max-w-[70rem] flex-grow">
@@ -217,7 +244,7 @@ export default function LabyrinthGameUI({
           <LabyrinthMoveCreator
             onMove={onMove}
             gameState={displayGameState}
-            ownPlayerIndex={isHistory ? null : ownPlayerIndex}
+            ownPlayerIndex={ownPlayerIndex}
             displayPath={lastMovePath}
             easyMode={dbGame.displayPaths}
           ></LabyrinthMoveCreator>
@@ -239,7 +266,12 @@ export default function LabyrinthGameUI({
             <b className="">
               {!isEndScreen ? (
                 myTurn ? (
-                  <>Its your turn</>
+                  <>
+                    Its your turn
+                    {playerToMove?.playerName
+                      ? ` (${playerToMove?.playerName})`
+                      : ""}
+                  </>
                 ) : (
                   <>
                     {playerToMove && getPlayerNameElem(playerToMove)} is to move

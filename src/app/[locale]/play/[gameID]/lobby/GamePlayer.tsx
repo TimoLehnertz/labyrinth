@@ -23,7 +23,9 @@ export default function GamePlayer({ gamePlayer, game }: Props) {
 
   useEffect(() => {
     setSelf(user?.id === gamePlayer.userID);
-    setHost(game.ownerUserID === gamePlayer.userID);
+    setHost(
+      game.ownerUserID === gamePlayer.userID && gamePlayer.playerName === null
+    );
     setMeHost(user?.id === game.ownerUserID);
     setBot(gamePlayer.botType !== null);
   }, [user?.id, game, gamePlayer]);
@@ -58,7 +60,7 @@ export default function GamePlayer({ gamePlayer, game }: Props) {
     }
   };
   let name = <span>-</span>;
-  if (isSelf) {
+  if (isSelf && gamePlayer.playerName === null) {
     name = <span>You</span>;
   } else if (gamePlayer.botType !== null) {
     const botName = getBotName(gamePlayer.id);
@@ -72,7 +74,7 @@ export default function GamePlayer({ gamePlayer, game }: Props) {
       </span>
     );
   } else if (gamePlayer.user !== null) {
-    name = <span>{gamePlayer.user.username}</span>;
+    name = <span>{gamePlayer.playerName ?? gamePlayer.user.username}</span>;
   }
   return (
     <div className="flex flex-row gap-2">

@@ -24,7 +24,9 @@ export default function GamePlayerArea({
           key={key}
           gamePlayer={gamePlayer}
           isToMove={gamePlayer.playerIndex === playerToMove}
-          isMe={user?.id === gamePlayer.userID}
+          isMe={
+            user?.id === gamePlayer.userID && gamePlayer.playerName === null
+          }
           playerClicked={playerClicked}
         />
       ))}

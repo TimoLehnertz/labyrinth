@@ -35,6 +35,7 @@ export default function Page() {
       <div className="flex justify-center mt-10">
         <div className="flex flex-col space-y-5 w-64">
           <PrimaryButton href="/play/online">Play online</PrimaryButton>
+          <PrimaryButton onClick={startAIGame}>Play local</PrimaryButton>
           <PrimaryButton onClick={startAIGame}>Challenge the AI</PrimaryButton>
         </div>
       </div>

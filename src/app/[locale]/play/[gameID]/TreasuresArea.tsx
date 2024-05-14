@@ -14,7 +14,10 @@ interface Props {
 }
 export default function GamePlayerArea({ gamePlayer, gameState }: Props) {
   const user = client.useUser();
-  const isSelf = gamePlayer.userID !== null && gamePlayer.userID === user?.id;
+  const isSelf =
+    gamePlayer.userID !== null &&
+    gamePlayer.userID === user?.id &&
+    gamePlayer.playerName === null;
   const playerState = gameState.allPlayerStates.getPlayerState(
     gamePlayer.playerIndex
   );
@@ -22,7 +25,10 @@ export default function GamePlayerArea({ gamePlayer, gameState }: Props) {
   for (let i = 0; i < playerState.foundTreasureCount; i++) {
     foundTreasures.push(playerState.getFoundTreasure(i));
   }
-  const playerName = gamePlayer.user?.username ?? getBotName(gamePlayer.id);
+  const playerName =
+    gamePlayer.playerName ??
+    gamePlayer.user?.username ??
+    getBotName(gamePlayer.id);
   return (
     <div className="flex flex-col items-center justify-start gap-4 mt-4">
       {!isSelf ? (

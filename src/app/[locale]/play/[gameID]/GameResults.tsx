@@ -91,7 +91,8 @@ export default function GameResults({ gameState, gamePlayers }: Props) {
                           : "") + " text-lg"
                   }
                 >
-                  {result.gamePlayer.user?.username ??
+                  {result.gamePlayer.playerName ??
+                    result.gamePlayer.user?.username ??
                     getBotName(result.gamePlayer.id ?? "") +
                       ` (${parseBotType(result.gamePlayer.botType)})`}
                 </div>

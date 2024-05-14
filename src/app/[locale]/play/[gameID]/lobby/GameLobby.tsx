@@ -17,7 +17,6 @@ interface Props {
   game: Game;
 }
 export default function GameLobby({ game }: Props) {
-  const router = useRouter();
   const [gamePlayers] = useEntity<GamePlayer>("game", "getPlayers", game.id);
   const user = client.useUser();
   const [isReady, setReady] = useState<boolean>(false);
@@ -80,7 +79,7 @@ export default function GameLobby({ game }: Props) {
       },
     });
     if (res.error) {
-      toast("an error occured");
+      toast("an error occurred");
     }
   };
   const addBot = async (botType: BotType) => {
@@ -97,6 +96,36 @@ export default function GameLobby({ game }: Props) {
     });
     if (res.error) {
       toast(res.error.message);
+    }
+  };
+  const addGuest = async () => {
+    // input name
+    let playerName: string | null;
+    let first = true;
+    do {
+      if (!first) {
+        if (!confirm("Please enter a name with more than 2 characters")) {
+          return;
+        }
+      }
+      playerName = window.prompt("Guest name");
+      first = false;
+    } while (playerName?.length === undefined || playerName?.length < 3);
+    // join game
+    const res = await client.api.POST("/game/join", {
+      params: {
+        query: {
+          gameID: game.id,
+          playerName,
+        },
+      },
+    });
+    if (res.error) {
+      if (res.error.message === "already playing") {
+        toast("Please Choose a different name");
+      } else {
+        toast("an error occurred");
+      }
     }
   };
   return (
@@ -118,14 +147,17 @@ export default function GameLobby({ game }: Props) {
       </div>
       <div className="mt-5 flex gap-2 flex-col sm:flex-row">
         {isJoined ? (
-          <PrimaryButton onClick={toggleReady}>
+          <SecondaryButton onClick={toggleReady}>
             {isReady ? "Make not ready" : "Make ready"}
-          </PrimaryButton>
+          </SecondaryButton>
         ) : (
           <></>
         )}
         {isJoined && isHost && !isFull ? (
           <>
+            <PrimaryButton className="sm:ml-4" onClick={() => addGuest()}>
+              Add local guest
+            </PrimaryButton>
             <SecondaryButton
               className="sm:ml-4"
               onClick={() => addBot("weak_bot")}
