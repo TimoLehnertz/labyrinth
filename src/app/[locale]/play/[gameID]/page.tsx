@@ -36,11 +36,5 @@ export default async function Page({ params }: Props) {
       }
     }
   }
-  return (
-    <LabyrinthGameUI
-      initialGame={response.data}
-      user={user}
-      ownPlayerIndex={ownPlayerIndex}
-    />
-  );
+  return <LabyrinthGameUI initialGame={response.data} user={user} />;
 }
