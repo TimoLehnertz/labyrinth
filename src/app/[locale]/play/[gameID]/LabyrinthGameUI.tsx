@@ -246,7 +246,7 @@ export default function LabyrinthGameUI({ initialGame, user }: Props) {
             gameState={displayGameState}
             ownPlayerIndex={ownPlayerIndex}
             displayPath={lastMovePath}
-            easyMode={dbGame.displayPaths}
+            gameMode={dbGame.gameMode}
           ></LabyrinthMoveCreator>
         </div>
         <div className="self-stretch">

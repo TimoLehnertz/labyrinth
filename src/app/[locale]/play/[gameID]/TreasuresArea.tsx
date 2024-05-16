@@ -1,6 +1,6 @@
 import React from "react";
 import { components } from "@/app/backend";
-import { GameState, Treasure } from "labyrinth-game-logic";
+import { BoardPosition, GameState, Treasure } from "labyrinth-game-logic";
 import TreasureCard from "./TreasureCard";
 import { client } from "@/app/clientAPI";
 import { playerIndexToColor } from "@/app/_components/Labyrinth/PathTileElem";
@@ -29,6 +29,18 @@ export default function GamePlayerArea({ gamePlayer, gameState }: Props) {
     gamePlayer.playerName ??
     gamePlayer.user?.username ??
     getBotName(gamePlayer.id);
+  let treasureLocation = null;
+  if (playerState.currentTreasure !== null) {
+    for (let x = 0; x < gameState.board.width; x++) {
+      for (let y = 0; y < gameState.board.height; y++) {
+        const tile = gameState.board.getTile(new BoardPosition(x, y));
+        if (tile.treasure?.equals(playerState.currentTreasure)) {
+          treasureLocation = `(${x + 1}|${y + 1})`;
+          break;
+        }
+      }
+    }
+  }
   return (
     <div className="flex flex-col items-center justify-start gap-4 mt-4">
       {!isSelf ? (
@@ -62,6 +74,7 @@ export default function GamePlayerArea({ gamePlayer, gameState }: Props) {
               ) : (
                 <>Searching for this treasure</>
               )}
+              {treasureLocation}
             </p>
             <TreasureCard large={true} treasure={playerState.currentTreasure} />
             {playerState.remainingTreasureCount === 1 ? (

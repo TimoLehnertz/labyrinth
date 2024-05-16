@@ -154,14 +154,14 @@ export interface components {
       /** @enum {string} */
       visibility: "public" | "friends" | "private";
       gameSetup: components["schemas"]["GameSetupDto"];
-      displayPaths: boolean;
+      gameMode: number;
     };
     CreateGameResponse: {
       gameID: string;
     };
     CreateGameErrorResponse: {
       /** @enum {string} */
-      message: "invalid setup";
+      message: "invalid setup" | "invalid game mode";
     };
     Game: {
       id: string;
@@ -175,14 +175,14 @@ export interface components {
       ownerUser: components["schemas"]["User"];
       finished: boolean;
       started: boolean;
-      displayPaths: boolean;
+      gameMode: number;
     };
     GetErrorResponse: Record<string, never>;
     UpdateGameDto: {
       /** @enum {string} */
       visibility: "public" | "friends" | "private";
       gameSetup: components["schemas"]["GameSetupDto"];
-      displayPaths: boolean;
+      gameMode: number;
       id: string;
       ownerID?: string;
     };

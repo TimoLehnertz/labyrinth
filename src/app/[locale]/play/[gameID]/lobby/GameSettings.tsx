@@ -36,7 +36,7 @@ export function useGame(
           visibility: game.visibility,
           gameSetup: JSON.parse(game.gameSetup),
           ownerID: game.ownerUserID,
-          displayPaths: game.displayPaths,
+          gameMode: game.gameMode,
         },
       })
       .then((res) => {
@@ -167,9 +167,16 @@ export default function GameSettings({ initialGame, user }: Props) {
     setGame(newGameSetup);
   };
 
-  const updateDisplayPaths = (event: ChangeEvent<HTMLInputElement>) => {
+  // const updateDisplayPaths = (event: ChangeEvent<HTMLInputElement>) => {
+  //   const newGameSetup = { ...game };
+  //   newGameSetup.displayPaths = !newGameSetup.displayPaths;
+  //   setGame(newGameSetup);
+  // };
+
+  const updateGameMode = (event: ChangeEvent<HTMLSelectElement>) => {
+    console.log(parseInt(event.target.value));
     const newGameSetup = { ...game };
-    newGameSetup.displayPaths = !newGameSetup.displayPaths;
+    newGameSetup.gameMode = parseInt(event.target.value);
     setGame(newGameSetup);
   };
   const gameSetup = JSON.parse(game.gameSetup);
@@ -194,15 +201,23 @@ export default function GameSettings({ initialGame, user }: Props) {
         </details>
         <br />
         <div className="flex gap-2">
-          <input
+          <select
+            id="gameMode"
+            className="text-black"
+            onChange={updateGameMode}
+            defaultValue={game.gameMode + ""}
+          >
+            <option value="0">Hard (no help)</option>
+            <option value="1">Normal (Displays paths)</option>
+            <option value="2">Tutorial (Shows the best move)</option>
+          </select>
+          {/* <input
             type="checkbox"
             id="displayPaths"
             checked={game.displayPaths}
             onChange={updateDisplayPaths}
-          />
-          <label htmlFor="displayPaths">
-            Beginner mode (Helps by displaying possible moves)
-          </label>
+          /> */}
+          <label htmlFor="gameMode">Game mode</label>
         </div>
         <br />
         <p className="text-xl text-center">Map editor</p>

@@ -185,6 +185,8 @@ export interface Props {
   onClick?: (position: BoardPosition) => void;
   displayDot?: boolean;
   highlightHeadings?: Heading[];
+  faded?: boolean;
+  highlightTile?: boolean;
 }
 export default function PathTileElem({
   gameState,
@@ -194,6 +196,9 @@ export default function PathTileElem({
   displayDot,
   onClick,
   highlightHeadings,
+  faded,
+  rotation,
+  highlightTile,
 }: Props) {
   let pathTile;
   if (x === undefined || y === undefined) {
@@ -202,7 +207,7 @@ export default function PathTileElem({
     pathTile = gameState.board.getTile(new BoardPosition(x, y));
   }
   const imagePath = openSidesToImg(pathTile);
-
+  pathTile = pathTile.rotate(rotation ?? 0);
   let treasureImage = <></>;
   if (pathTile.treasure) {
     treasureImage = (
@@ -232,9 +237,11 @@ export default function PathTileElem({
     }
     onClick?.(new BoardPosition(x, y));
   };
-
   return (
-    <div className="relative aspect-square group/tile" onClick={clicked}>
+    <div
+      className={`relative aspect-square group/tile ${faded ? "opacity-35" : ""} ${highlightTile ? "brightness-150" : ""}`}
+      onClick={clicked}
+    >
       <Image
         className={rotationToClass(pathTile.rotation) + " absolute inset-0"}
         src={imagePath}

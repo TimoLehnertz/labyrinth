@@ -20,7 +20,7 @@ export default function Page() {
       body: {
         gameSetup,
         visibility: "private",
-        displayPaths: true,
+        gameMode: 0,
       },
     });
     if (res.error) {

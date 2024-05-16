@@ -1,9 +1,11 @@
 "use client";
 import {
   BoardPosition,
+  buildMoveGenerator,
   Game,
   GameState,
   Heading,
+  manhattanEvaluator,
   Move,
   Path,
   PathTile,
@@ -73,7 +75,9 @@ function getShiftPositionTile(
   setShiftPosition: ((shiftPosition: ShiftPosition) => void) | undefined,
   gameState: GameState,
   ownPlayerIndex: number | null,
-  key: string
+  key: string,
+  bestMove?: Move,
+  altered?: boolean
 ) {
   const isHere =
     currentShiftPosition !== null && shiftPosition.equals(currentShiftPosition);
@@ -85,6 +89,14 @@ function getShiftPositionTile(
     >
       {isHere && (
         <PathTileElem gameState={gameState} ownPlayerIndex={ownPlayerIndex} />
+      )}
+      {!isHere && bestMove && !altered && (
+        <PathTileElem
+          gameState={gameState}
+          ownPlayerIndex={ownPlayerIndex}
+          faded={true}
+          rotation={bestMove.rotateBeforeShift ?? 0}
+        />
       )}
     </div>
   );
@@ -101,7 +113,9 @@ export function getTile(
   clickablePositions: BoardPosition[],
   tileClicked: (position: BoardPosition) => void,
   highlightHeadings?: Heading[],
-  easyMode?: boolean
+  easyMode?: boolean,
+  bestMove?: Move,
+  altered?: boolean
 ) {
   const width = gameState.board.width;
   const height = gameState.board.height;
@@ -113,6 +127,12 @@ export function getTile(
         break;
       }
     }
+    const highlightTile =
+      altered === true &&
+      bestMove?.to.equals(new BoardPosition(x - 1, y - 1)) &&
+      bestMove?.toShiftPosition.equals(
+        gameState.board.invertShiftPosition(gameState.board.shiftPosition)
+      );
     return (
       <PathTileElem
         key={`tile-${x}-${y}`}
@@ -123,6 +143,7 @@ export function getTile(
         displayDot={easyMode && isClickable}
         onClick={isClickable ? tileClicked : undefined}
         highlightHeadings={highlightHeadings}
+        highlightTile={highlightTile}
       />
     );
   }
@@ -135,15 +156,18 @@ export function getTile(
     return getEmptyEdgeTile(key);
   }
   const index = (offset - 1) / 2;
+  const pos = new ShiftPosition(heading, index);
   return getShiftPositionTile(
-    new ShiftPosition(heading, index),
+    pos,
     shiftPosition,
     ownPlayerIndex === gameState.allPlayerStates.playerIndexToMove
       ? setShiftPosition
       : undefined,
     gameState,
     ownPlayerIndex,
-    key
+    key,
+    bestMove?.toShiftPosition.equals(pos) ? bestMove : undefined,
+    altered
   );
 }
 
@@ -152,14 +176,14 @@ interface Props {
   onMove: (move: Move) => void;
   ownPlayerIndex: number | null;
   displayPath: Path | null;
-  easyMode: boolean;
+  gameMode: number;
 }
 export default function LabyrinthMoveCreator({
   gameState,
   onMove,
   ownPlayerIndex,
   displayPath,
-  easyMode,
+  gameMode,
 }: Props) {
   const [displayPositions, setDisplayPositions] = useState(false);
   const [alteredGameState, setAlteredGameState] =
@@ -182,6 +206,14 @@ export default function LabyrinthMoveCreator({
 
   const isToMove =
     ownPlayerIndex === gameState.allPlayerStates.playerIndexToMove;
+
+  let bestMove = undefined;
+
+  if (isToMove && gameMode === 2) {
+    const generator = buildMoveGenerator(manhattanEvaluator, 1);
+    bestMove = generator(gameState);
+    console.log("best: ", bestMove);
+  }
 
   const updateShiftPosition = (shiftPosition: ShiftPosition) => {
     setShiftPosition(shiftPosition);
@@ -253,7 +285,9 @@ export default function LabyrinthMoveCreator({
           clickablePositions,
           tileClicked,
           headings,
-          easyMode
+          gameMode > 0,
+          bestMove,
+          displayPositions
         )
       );
     }

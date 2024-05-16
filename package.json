@@ -14,7 +14,7 @@
     "babel-preset-env": "^1.7.0",
     "formatjs": "^0.1.1",
     "jwt-js-decode": "^1.8.2",
-    "labyrinth-game-logic": "^1.0.48",
+    "labyrinth-game-logic": "^1.0.51",
     "nats": "^2.21.0",
     "negotiator": "^0.6.3",
     "next": "14.1.3",
